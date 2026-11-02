@@ -1,0 +1,8 @@
+{
+  "name": "graph-feature",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/graph/feature/src",
+  "prefix": "lv",
+  "projectType": "library",
+  "tags": ["scope:graph", "type:feature"]
+}

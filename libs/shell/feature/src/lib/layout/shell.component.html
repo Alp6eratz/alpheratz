@@ -1,0 +1,91 @@
+<!-- Разметка оболочки приложения. Гостю показываются только экраны входа/регистрации. -->
+@if (!auth.user()) {
+  <router-outlet />
+} @else {
+  <div class="lv-app" [class.handset]="handset()">
+    @if (handset()) {
+      <!-- Мобильная верхняя панель вместо ленты. -->
+      <mat-toolbar class="mobile-toolbar">
+        <button mat-icon-button (click)="toggleLeft()" aria-label="Меню">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span class="mobile-title">{{ vault.activeNote()?.title ?? 'LinguaVault' }}</span>
+        <button mat-icon-button (click)="openPalette()" aria-label="Палитра команд">
+          <mat-icon>search</mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleRight()" aria-label="Связи">
+          <mat-icon>right_panel_open</mat-icon>
+        </button>
+        <lv-user-menu tooltip="below" />
+      </mat-toolbar>
+    }
+
+    <div class="lv-body">
+      @if (!handset()) {
+        <lv-ribbon><lv-user-menu /></lv-ribbon>
+      }
+
+      <mat-sidenav-container class="lv-container" autosize>
+        <mat-sidenav
+          class="lv-sidenav left"
+          position="start"
+          [mode]="handset() ? 'over' : 'side'"
+          [opened]="leftOpened()"
+          (closedStart)="onClosed('left')"
+          [style.width.px]="handset() ? null : leftWidth()"
+        >
+          @if (handset()) {
+            <lv-ribbon orientation="horizontal" />
+          }
+          <lv-side-panel side="left" />
+          @if (!handset()) {
+            <div class="resizer" (pointerdown)="startResize($event)" aria-hidden="true"></div>
+          }
+        </mat-sidenav>
+
+        <mat-sidenav
+          class="lv-sidenav right"
+          position="end"
+          [mode]="handset() ? 'over' : 'side'"
+          [opened]="rightOpened()"
+          (closedStart)="onClosed('right')"
+        >
+          <lv-side-panel side="right" />
+        </mat-sidenav>
+
+        <mat-sidenav-content class="lv-main">
+          <div class="main-header">
+            @if (!handset()) {
+              <button
+                mat-icon-button
+                class="panel-toggle"
+                (click)="toggleLeft()"
+                aria-label="Левая панель"
+              >
+                <mat-icon>{{ leftOpened() ? 'left_panel_close' : 'left_panel_open' }}</mat-icon>
+              </button>
+            }
+            <lv-tab-bar class="tab-bar" />
+            @if (!handset()) {
+              <button
+                mat-icon-button
+                class="panel-toggle"
+                (click)="toggleRight()"
+                aria-label="Правая панель"
+              >
+                <mat-icon>{{ rightOpened() ? 'right_panel_close' : 'right_panel_open' }}</mat-icon>
+              </button>
+            }
+          </div>
+          <main class="lv-view">
+            <router-outlet />
+          </main>
+        </mat-sidenav-content>
+      </mat-sidenav-container>
+    </div>
+
+    @if (!handset()) {
+      <lv-status-bar />
+    }
+  </div>
+}

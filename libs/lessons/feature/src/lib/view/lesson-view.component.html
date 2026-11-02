@@ -1,0 +1,137 @@
+<!-- Страница урока. -->
+@if (lesson(); as l) {
+  @if (access()?.locked) {
+    <div class="locked">
+      <mat-icon>lock</mat-icon>
+      <h2>Урок пока закрыт</h2>
+      <p>Завершите предыдущие уроки, чтобы открыть «{{ l.title }}».</p>
+      <a mat-flat-button routerLink="/lessons">К списку уроков</a>
+    </div>
+  } @else {
+    <article class="page">
+      <nav class="crumbs"><a routerLink="/lessons">Уроки</a> / Урок {{ number() }}</nav>
+      <header class="head">
+        <div>
+          <h1>{{ l.title }}</h1>
+          @if (l.description) {
+            <p class="desc">{{ l.description }}</p>
+          }
+        </div>
+        @if (facade.isAdmin()) {
+          <a mat-stroked-button [routerLink]="['/lessons', l.id, 'edit']"
+            ><mat-icon>edit</mat-icon>Редактировать</a
+          >
+        } @else if (access()?.completed) {
+          <span class="done-badge"
+            ><mat-icon>check_circle</mat-icon>Пройден
+            {{ access()?.completedAt | date: 'd MMM' }}</span
+          >
+        }
+      </header>
+
+      <section class="materials">
+        @for (m of l.materials; track m.id) {
+          <lv-material-viewer [material]="m" />
+        } @empty {
+          <p class="muted">Материалы урока ещё не добавлены.</p>
+        }
+      </section>
+
+      @if (!facade.isAdmin()) {
+        <!-- Заметка студента к уроку. -->
+        <section class="note">
+          <div class="note-head">
+            <h2><mat-icon>edit_note</mat-icon>Моя заметка к уроку</h2>
+            @if (submission(); as s) {
+              <span class="status" [class]="s.status">{{ statusLabels[s.status] }}</span>
+            }
+          </div>
+          <p class="muted">
+            Пишите конспект, ответы на задания и новые слова. Преподаватель проверит заметку после
+            отправки.
+            @if (l.requireNote) {
+              <strong>Для завершения урока заметку нужно отправить.</strong>
+            }
+          </p>
+
+          @if (submission()?.teacherComment; as comment) {
+            <div class="teacher">
+              <mat-icon>school</mat-icon>
+              <div>
+                <div class="teacher-title">Комментарий преподавателя</div>
+                {{ comment }}
+              </div>
+            </div>
+          }
+
+          <mat-button-toggle-group
+            class="mode"
+            [value]="noteMode()"
+            (change)="noteMode.set($event.value)"
+            hideSingleSelectionIndicator
+          >
+            <mat-button-toggle value="edit"><mat-icon>edit</mat-icon></mat-button-toggle>
+            <mat-button-toggle value="preview"><mat-icon>visibility</mat-icon></mat-button-toggle>
+          </mat-button-toggle-group>
+          <div class="note-box">
+            @if (noteMode() === 'edit') {
+              <lv-markdown-editor
+                [value]="draft()"
+                (valueInput)="draft.set($event)"
+                (valueChange)="saveDraft($event)"
+              />
+            } @else {
+              <lv-markdown-preview class="note-preview" [content]="draft() || '*Заметка пуста*'" />
+            }
+          </div>
+          <div class="note-actions">
+            <span class="muted small">Черновик сохраняется автоматически</span>
+            <button mat-stroked-button [disabled]="!canSubmit()" (click)="submit()">
+              <mat-icon>send</mat-icon
+              >{{
+                submission()?.status === 'needs-work'
+                  ? 'Отправить повторно'
+                  : 'Отправить на проверку'
+              }}
+            </button>
+          </div>
+        </section>
+
+        <footer class="footer">
+          @if (access()?.completed) {
+            @if (next(); as n) {
+              <a mat-flat-button [routerLink]="['/lessons', n.id]"
+                >Следующий урок<mat-icon iconPositionEnd>arrow_forward</mat-icon></a
+              >
+            } @else {
+              <a mat-flat-button routerLink="/lessons">Курс пройден — к списку</a>
+            }
+          } @else {
+            <button mat-flat-button (click)="complete()">
+              <mat-icon>task_alt</mat-icon>Завершить урок
+            </button>
+          }
+        </footer>
+      } @else {
+        <!-- Для администратора: заметки студентов к уроку. -->
+        <section class="note">
+          <h2><mat-icon>rate_review</mat-icon>Заметки студентов · {{ studentNotes().length }}</h2>
+          @for (s of studentNotes(); track s.id) {
+            <a class="student-note" routerLink="/admin" [queryParams]="{ tab: 'reviews' }">
+              <span>{{ s.userName }}</span>
+              <span class="status" [class]="s.status">{{ statusLabels[s.status] }}</span>
+            </a>
+          } @empty {
+            <p class="muted">Студенты ещё не отправляли заметки к этому уроку.</p>
+          }
+        </section>
+      }
+    </article>
+  }
+} @else if (facade.loaded()) {
+  <div class="locked">
+    <mat-icon>search_off</mat-icon>
+    <h2>Урок не найден</h2>
+    <a mat-flat-button routerLink="/lessons">К списку уроков</a>
+  </div>
+}

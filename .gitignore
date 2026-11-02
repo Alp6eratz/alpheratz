@@ -1,0 +1,17 @@
+node_modules
+dist
+tmp
+.nx/cache
+.nx/workspace-data
+.angular
+*.log
+.DS_Store
+coverage
+
+# Бэкенд (Python)
+backend/.venv
+backend/data
+__pycache__/
+*.pyc
+.pytest_cache
+.env

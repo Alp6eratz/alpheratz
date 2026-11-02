@@ -1,0 +1,122 @@
+<!-- Шаблон файлового проводника: панель инструментов + рекурсивное дерево. -->
+<div class="view-toolbar">
+  <span class="view-title">Файлы</span>
+  <button mat-icon-button matTooltip="Новая заметка" (click)="newNote()">
+    <mat-icon>edit_square</mat-icon>
+  </button>
+  <button mat-icon-button matTooltip="Новая папка" (click)="newFolder()">
+    <mat-icon>create_new_folder</mat-icon>
+  </button>
+  <button mat-icon-button matTooltip="Свернуть всё" (click)="collapseAll()">
+    <mat-icon>unfold_less</mat-icon>
+  </button>
+</div>
+
+<div class="tree" (dragover)="$event.preventDefault()" (drop)="onDrop($event, '')">
+  <ng-container *ngTemplateOutlet="nodes; context: { $implicit: vault.fileTree(), depth: 0 }" />
+</div>
+
+<!-- Рекурсивный шаблон узлов дерева. -->
+<ng-template #nodes let-list let-depth="depth">
+  @for (node of list; track node.key) {
+    @if (node.kind === 'folder') {
+      <div
+        class="tree-item folder"
+        [style.padding-left.px]="8 + depth * 14"
+        (click)="toggle(node.key)"
+        (contextmenu)="$event.preventDefault(); menuNode.set(node); folderTrigger.openMenu()"
+        (dragover)="$event.preventDefault()"
+        (drop)="onDrop($event, node.key)"
+      >
+        <mat-icon class="chevron" [class.collapsed]="collapsed().has(node.key)"
+          >expand_more</mat-icon
+        >
+        <span class="name">{{ node.name }}</span>
+        <button
+          mat-icon-button
+          class="item-action"
+          #folderTrigger="matMenuTrigger"
+          [matMenuTriggerFor]="folderMenu"
+          (click)="$event.stopPropagation(); menuNode.set(node)"
+          aria-label="Действия с папкой"
+        >
+          <mat-icon>more_horiz</mat-icon>
+        </button>
+      </div>
+      @if (!collapsed().has(node.key)) {
+        <ng-container
+          *ngTemplateOutlet="nodes; context: { $implicit: node.children, depth: depth + 1 }"
+        />
+      }
+    } @else {
+      <div
+        class="tree-item note"
+        draggable="true"
+        [class.active]="node.key === activeId()"
+        [style.padding-left.px]="22 + depth * 14"
+        (click)="vault.open(node.key)"
+        (dragstart)="onDragStart($event, node)"
+        (contextmenu)="$event.preventDefault(); menuNode.set(node); noteTrigger.openMenu()"
+      >
+        <span class="name">{{ node.name }}</span>
+        <button
+          mat-icon-button
+          class="item-action"
+          #noteTrigger="matMenuTrigger"
+          [matMenuTriggerFor]="noteMenu"
+          (click)="$event.stopPropagation(); menuNode.set(node)"
+          aria-label="Действия с заметкой"
+        >
+          <mat-icon>more_horiz</mat-icon>
+        </button>
+      </div>
+    }
+  } @empty {
+    @if (depth === 0) {
+      <div class="view-empty">Хранилище пусто. Создайте первую заметку.</div>
+    }
+  }
+</ng-template>
+
+<!-- Контекстное меню папки. -->
+<mat-menu #folderMenu="matMenu">
+  @if (menuNode(); as node) {
+    <button mat-menu-item (click)="newNote(node.key)">
+      <mat-icon>note_add</mat-icon>Новая заметка
+    </button>
+    <button mat-menu-item (click)="newFolder(node.key)">
+      <mat-icon>create_new_folder</mat-icon>Новая подпапка
+    </button>
+    <button mat-menu-item (click)="remove(node)"><mat-icon>delete</mat-icon>Удалить папку</button>
+  }
+</mat-menu>
+
+<!-- Контекстное меню заметки. -->
+<mat-menu #noteMenu="matMenu">
+  @if (menuNode(); as node) {
+    <button mat-menu-item (click)="vault.open(node.key, 'edit')">
+      <mat-icon>edit</mat-icon>Редактировать
+    </button>
+    <button mat-menu-item (click)="rename(node)">
+      <mat-icon>drive_file_rename_outline</mat-icon>Переименовать
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="moveMenu">
+      <mat-icon>drive_file_move</mat-icon>Переместить в…
+    </button>
+    <button mat-menu-item (click)="remove(node)"><mat-icon>delete</mat-icon>Удалить</button>
+  }
+</mat-menu>
+
+<!-- Подменю выбора папки для перемещения. -->
+<mat-menu #moveMenu="matMenu">
+  @if (menuNode(); as node) {
+    <button mat-menu-item (click)="move(node, '')">
+      <mat-icon>home</mat-icon>Корень хранилища
+    </button>
+    @for (folder of vault.folders(); track folder) {
+      <button mat-menu-item (click)="move(node, folder)">
+        <mat-icon>folder</mat-icon>{{ folder }}
+      </button>
+    }
+  }
+</mat-menu>

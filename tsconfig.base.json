@@ -1,0 +1,42 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": false,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2022",
+    "module": "esnext",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "baseUrl": ".",
+    "paths": {
+      "@lingua/shared/models": ["libs/shared/models/src/index.ts"],
+      "@lingua/shared/util": ["libs/shared/util/src/index.ts"],
+      "@lingua/shared/ui": ["libs/shared/ui/src/index.ts"],
+      "@lingua/core/plugin-api": ["libs/core/plugin-api/src/index.ts"],
+      "@lingua/core/data-access": ["libs/core/data-access/src/index.ts"],
+      "@lingua/core/markdown": ["libs/core/markdown/src/index.ts"],
+      "@lingua/shell/feature": ["libs/shell/feature/src/index.ts"],
+      "@lingua/notes/feature": ["libs/notes/feature/src/index.ts"],
+      "@lingua/flashcards/feature": ["libs/flashcards/feature/src/index.ts"],
+      "@lingua/graph/feature": ["libs/graph/feature/src/index.ts"],
+      "@lingua/settings/feature": ["libs/settings/feature/src/index.ts"],
+      "@lingua/auth/data-access": ["libs/auth/data-access/src/index.ts"],
+      "@lingua/auth/feature": ["libs/auth/feature/src/index.ts"],
+      "@lingua/lessons/data-access": ["libs/lessons/data-access/src/index.ts"],
+      "@lingua/lessons/feature": ["libs/lessons/feature/src/index.ts"],
+      "@lingua/admin/feature": ["libs/admin/feature/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

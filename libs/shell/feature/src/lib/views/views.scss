@@ -1,0 +1,181 @@
+// Общие стили видов боковых панелей (проводник, поиск, теги, ссылки, структура).
+:host {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.view-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px 4px 12px;
+  min-height: 40px;
+  .view-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--lv-text-muted);
+  }
+  button {
+    --mat-icon-button-state-layer-size: 30px;
+    padding: 3px;
+    color: var(--lv-text-muted);
+  }
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.view-pad {
+  padding: 0 10px 8px;
+}
+.view-meta,
+.section-title {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  color: var(--lv-text-faint);
+}
+.section-title {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 8px;
+}
+.view-empty {
+  padding: 12px;
+  color: var(--lv-text-faint);
+  font-size: 0.85rem;
+}
+.search-field {
+  width: 100%;
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+}
+
+.tree {
+  padding: 0 4px 24px;
+  min-height: 120px;
+}
+.tree-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 28px;
+  padding-right: 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--lv-text-muted);
+  .name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chevron {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.15s;
+    &.collapsed {
+      transform: rotate(-90deg);
+    }
+  }
+  .item-action {
+    visibility: hidden;
+    --mat-icon-button-state-layer-size: 24px;
+    padding: 2px;
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+  &:hover {
+    background: var(--lv-hover);
+    color: var(--lv-text);
+    .item-action {
+      visibility: visible;
+    }
+  }
+  &.folder {
+    font-weight: 500;
+  }
+  &.active {
+    background: var(--lv-active);
+    color: var(--lv-text);
+  }
+  @media (hover: none) {
+    .item-action {
+      visibility: visible;
+    }
+  }
+}
+
+.search-result,
+.tag-row,
+.link-row,
+.outline-row {
+  display: flex;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--lv-text-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  &:hover {
+    background: var(--lv-hover);
+    color: var(--lv-text);
+  }
+}
+.search-result {
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 12px;
+  .title {
+    color: var(--lv-text);
+    font-weight: 500;
+  }
+  .snippet {
+    font-size: 0.8rem;
+    color: var(--lv-text-faint);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}
+.tag-row {
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 12px;
+  .count {
+    font-size: 0.75rem;
+    color: var(--lv-text-faint);
+  }
+}
+.link-row {
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+  &.unresolved {
+    opacity: 0.65;
+    font-style: italic;
+  }
+}
+.outline-row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-right: 8px;
+}

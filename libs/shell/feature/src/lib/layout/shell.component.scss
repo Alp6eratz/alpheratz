@@ -1,0 +1,98 @@
+// Стили оболочки: полноэкранная сетка с панелями, адаптивность под мобильные устройства.
+:host {
+  display: block;
+  height: 100dvh;
+}
+
+.lv-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--lv-bg);
+  color: var(--lv-text);
+}
+.lv-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.lv-container {
+  flex: 1;
+  background: var(--lv-bg);
+}
+
+.lv-sidenav {
+  background: var(--lv-bg-secondary);
+  color: var(--lv-text);
+  border: none;
+  border-radius: 0;
+  &.left {
+    border-right: 1px solid var(--lv-border);
+  }
+  &.right {
+    width: 280px;
+    border-left: 1px solid var(--lv-border);
+  }
+  ::ng-deep .mat-drawer-inner-container {
+    display: flex;
+    flex-direction: column;
+  }
+}
+.handset .lv-sidenav {
+  width: min(86vw, 340px) !important;
+}
+
+// Разделитель для изменения ширины левой панели.
+.resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 2;
+  &:hover {
+    background: var(--lv-accent);
+    opacity: 0.5;
+  }
+}
+
+.lv-main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.main-header {
+  display: flex;
+  align-items: center;
+  background: var(--lv-bg-secondary);
+  .tab-bar {
+    flex: 1;
+    min-width: 0;
+  }
+  .panel-toggle {
+    --mat-icon-button-state-layer-size: 34px;
+    padding: 5px;
+    color: var(--lv-text-muted);
+    align-self: center;
+  }
+}
+.lv-view {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.mobile-toolbar {
+  --mat-toolbar-container-background-color: var(--lv-bg-secondary);
+  --mat-toolbar-standard-height: 52px;
+  border-bottom: 1px solid var(--lv-border);
+  gap: 4px;
+  .mobile-title {
+    flex: 1;
+    font-size: 1rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

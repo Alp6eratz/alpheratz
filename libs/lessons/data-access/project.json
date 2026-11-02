@@ -1,0 +1,8 @@
+{
+  "name": "lessons-data-access",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/lessons/data-access/src",
+  "prefix": "lv",
+  "projectType": "library",
+  "tags": ["scope:lessons", "type:data-access"]
+}

@@ -1,0 +1,135 @@
+<!-- Страница колод карточек. -->
+<div class="page">
+  <header class="head">
+    <div>
+      <h1>Карточки</h1>
+      <p class="muted">
+        Добавляйте карточки кнопкой или в любой заметке строкой <code>слово :: перевод</code>.
+        Колоды формируются по тегам заметок.
+      </p>
+    </div>
+    <button mat-flat-button (click)="addCard()"><mat-icon>add</mat-icon>Добавить карточку</button>
+  </header>
+
+  <section class="summary">
+    <mat-card appearance="outlined" class="tile">
+      <div class="value">{{ service.dueCount() }}</div>
+      <div class="label">к повторению</div>
+    </mat-card>
+    <mat-card appearance="outlined" class="tile">
+      <div class="value">{{ service.newLeftToday() }}</div>
+      <div class="label">новых доступно сегодня</div>
+    </mat-card>
+    <mat-card appearance="outlined" class="tile">
+      <div class="value">{{ service.todayStats().reviewed }}</div>
+      <div class="label">ответов сегодня</div>
+    </mat-card>
+    <mat-card appearance="outlined" class="tile">
+      <div class="value">{{ learnedPercent() }}%</div>
+      <div class="label">изучено</div>
+      <mat-progress-bar mode="determinate" [value]="learnedPercent()" />
+    </mat-card>
+  </section>
+
+  <h2>Колоды</h2>
+  <div class="decks">
+    @for (deck of service.decks(); track deck.id) {
+      <mat-card appearance="outlined" class="deck">
+        <div class="deck-title">
+          <mat-icon>{{ deck.id === 'all' ? 'layers' : 'sell' }}</mat-icon
+          >{{ deck.title }}
+        </div>
+        <div class="counts">
+          <span class="due">{{ deck.due }} повторить</span>
+          <span class="new">{{ deck.fresh }} новых</span>
+          <span class="muted">{{ deck.total }} всего</span>
+        </div>
+        <div class="deck-actions">
+          <a
+            mat-flat-button
+            [routerLink]="['/flashcards/review']"
+            [queryParams]="{ deck: deck.id }"
+            [disabled]="!deck.due && !deck.fresh"
+          >
+            <mat-icon>play_arrow</mat-icon>Учить
+          </a>
+          <a
+            mat-button
+            [routerLink]="['/flashcards/review']"
+            [queryParams]="{ deck: deck.id, reverse: 1 }"
+            [disabled]="!deck.due && !deck.fresh"
+          >
+            <mat-icon>swap_horiz</mat-icon>Наоборот
+          </a>
+        </div>
+      </mat-card>
+    } @empty {
+      <p class="muted">Карточек пока нет.</p>
+    }
+  </div>
+
+  <h2>Мои карточки · {{ cardList().length }}</h2>
+  <div class="card-tools">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="card-search">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        placeholder="Поиск по карточкам"
+        [value]="cardQuery()"
+        (input)="cardQuery.set($any($event.target).value)"
+      />
+    </mat-form-field>
+    <div class="deck-chips">
+      @for (deck of service.decks(); track deck.id) {
+        <button
+          class="deck-chip"
+          [class.active]="cardDeck() === deck.id"
+          (click)="cardDeck.set(deck.id)"
+        >
+          {{ deck.title }}
+        </button>
+      }
+    </div>
+  </div>
+  <div class="card-list">
+    @for (card of cardList(); track card.id) {
+      <div class="card-row">
+        <span class="front">{{ card.front }}</span>
+        <span class="arrow">→</span>
+        <span class="back">{{ card.back }}</span>
+        <button
+          mat-icon-button
+          (click)="vault.open(card.noteId)"
+          matTooltip="Открыть заметку"
+          aria-label="Открыть заметку"
+        >
+          <mat-icon>description</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          (click)="deleteCard(card)"
+          matTooltip="Удалить карточку"
+          aria-label="Удалить карточку"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    } @empty {
+      <p class="muted pad">Карточек не найдено.</p>
+    }
+  </div>
+
+  <h2>Активность за 14 дней</h2>
+  <div class="chart" role="img" aria-label="Количество ответов по дням">
+    @for (d of activity(); track d.key) {
+      <div class="bar-wrap" [title]="d.label + ': ' + d.count">
+        <div class="bar" [style.height.%]="d.height"></div>
+        <span class="bar-label">{{ d.label.split(' ')[0] }}</span>
+      </div>
+    }
+  </div>
+
+  <button mat-button class="reset" (click)="reset()">
+    <mat-icon>restart_alt</mat-icon>Сбросить прогресс
+  </button>
+</div>

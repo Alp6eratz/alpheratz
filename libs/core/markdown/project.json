@@ -1,0 +1,8 @@
+{
+  "name": "core-markdown",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/core/markdown/src",
+  "prefix": "lv",
+  "projectType": "library",
+  "tags": ["scope:core", "type:markdown"]
+}

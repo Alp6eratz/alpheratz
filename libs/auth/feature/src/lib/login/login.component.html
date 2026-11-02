@@ -1,0 +1,61 @@
+<!-- Экран входа. -->
+<div class="card">
+  <div class="brand"><img src="favicon.svg" alt="" /><span>LinguaVault</span></div>
+  <h1>Вход</h1>
+  <p class="subtitle">Продолжите изучение языков с того места, где остановились.</p>
+
+  @if (auth.error(); as error) {
+    <div class="error" role="alert"><mat-icon>error</mat-icon>{{ error }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="email" />
+      <mat-icon matPrefix>mail</mat-icon>
+      @if (form.controls.email.hasError('email')) {
+        <mat-error>Некорректный email</mat-error>
+      } @else if (form.controls.email.hasError('required')) {
+        <mat-error>Введите email</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Пароль</mat-label>
+      <input
+        matInput
+        [type]="showPassword() ? 'text' : 'password'"
+        formControlName="password"
+        autocomplete="current-password"
+      />
+      <mat-icon matPrefix>lock</mat-icon>
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="showPassword.set(!showPassword())"
+        [attr.aria-label]="showPassword() ? 'Скрыть пароль' : 'Показать пароль'"
+      >
+        <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      @if (form.controls.password.hasError('required')) {
+        <mat-error>Введите пароль</mat-error>
+      }
+    </mat-form-field>
+
+    <button mat-flat-button class="submit" type="submit" [disabled]="auth.pending()">
+      @if (auth.pending()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Войти
+      }
+    </button>
+  </form>
+
+  <div class="switch">Нет аккаунта? <a routerLink="/register">Зарегистрироваться</a></div>
+
+  <div class="hint">
+    Демо-администратор: <code>{{ demo.email }}</code> / <code>{{ demo.password }}</code>
+    <button mat-button type="button" (click)="fillDemo()">Подставить</button>
+  </div>
+</div>

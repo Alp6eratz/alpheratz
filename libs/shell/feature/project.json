@@ -1,0 +1,8 @@
+{
+  "name": "shell-feature",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shell/feature/src",
+  "prefix": "lv",
+  "projectType": "library",
+  "tags": ["scope:shell", "type:feature"]
+}

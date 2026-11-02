@@ -1,0 +1,155 @@
+// Стили списка уроков: «дорожка» курса с номерами, статусами и замками.
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  h1 {
+    margin: 0 0 4px;
+  }
+}
+.muted {
+  color: var(--lv-text-muted);
+  margin: 0;
+}
+.course-progress {
+  margin: 24px 0 8px;
+  .label {
+    margin-bottom: 8px;
+    color: var(--lv-text-muted);
+    strong {
+      color: var(--lv-text);
+    }
+  }
+}
+.lessons {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lesson {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--lv-bg-secondary);
+  border: 1px solid var(--lv-border);
+  &.locked {
+    opacity: 0.6;
+  }
+  &.done .num {
+    background: #3fb27f;
+    color: #fff;
+  }
+}
+.num {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  background: var(--lv-active);
+  color: var(--lv-accent);
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+.body {
+  flex: 1;
+  min-width: 0;
+}
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--lv-text);
+  text-decoration: none;
+}
+a.title:hover {
+  color: var(--lv-accent);
+}
+.chip {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--lv-hover);
+  color: var(--lv-text-muted);
+  &.draft {
+    background: color-mix(in srgb, #d99a1e 20%, transparent);
+    color: #d99a1e;
+  }
+  &.done {
+    background: color-mix(in srgb, #3fb27f 20%, transparent);
+    color: #3fb27f;
+  }
+  &.progress {
+    background: var(--lv-active);
+    color: var(--lv-accent);
+  }
+}
+.desc {
+  margin: 4px 0 0;
+  color: var(--lv-text-muted);
+  font-size: 0.92rem;
+}
+.types {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: var(--lv-text-faint);
+  font-size: 0.8rem;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+.lock-hint {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--lv-text-faint);
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--lv-text-faint);
+}
+@media (max-width: 600px) {
+  .page {
+    padding: 20px 12px 48px;
+  }
+  .lesson {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
