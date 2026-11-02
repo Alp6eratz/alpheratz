@@ -1,6 +1,18 @@
-// Точка входа приложения: запуск корневого компонента с конфигурацией провайдеров.
+// Точка входа приложения: читает config.json (адрес бэкенда) и запускает корневой компонент.
 import { bootstrapApplication } from '@angular/platform-browser';
 import { App } from './app/app';
-import { appConfig } from './app/app.config';
+import { createAppConfig, RuntimeConfig } from './app/app.config';
 
-bootstrapApplication(App, appConfig).catch((err) => console.error(err));
+/** Загружает настройки запуска; при ошибке — локальный режим без сервера. */
+async function loadRuntimeConfig(): Promise<RuntimeConfig> {
+  try {
+    const response = await fetch('config.json', { cache: 'no-store' });
+    return response.ok ? ((await response.json()) as RuntimeConfig) : {};
+  } catch {
+    return {};
+  }
+}
+
+loadRuntimeConfig()
+  .then((runtime) => bootstrapApplication(App, createAppConfig(runtime)))
+  .catch((err) => console.error(err));

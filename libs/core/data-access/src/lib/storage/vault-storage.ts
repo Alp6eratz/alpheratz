@@ -10,6 +10,19 @@ export abstract class VaultStorage {
   abstract write<T>(key: string, value: T): void;
   /** Удаляет значение по ключу. */
   abstract remove(key: string): void;
+
+  /**
+   * Подготовка хранилища пользователя перед чтением (например, загрузка с сервера в кэш).
+   * Локальной реализации ничего делать не нужно.
+   */
+  prepare(_scope: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  /** Дожидается отправки всех отложенных изменений (вызывается перед выходом). */
+  flush(): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 /** Реализация по умолчанию на основе localStorage браузера. */

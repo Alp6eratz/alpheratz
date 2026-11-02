@@ -3,8 +3,19 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { NotesActions } from '@lingua/core/data-access';
-import { catchError, defer, exhaustMap, filter, from, map, of, tap } from 'rxjs';
+import { ApiClient, NotesActions, VaultStorage } from '@lingua/core/data-access';
+import {
+  catchError,
+  concatMap,
+  defer,
+  exhaustMap,
+  filter,
+  from,
+  map,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { AuthActions } from './auth.actions';
 import { AuthBackend } from './auth-backend';
 
@@ -70,11 +81,18 @@ export const redirectAfterLogin$ = createEffect(
   { functional: true, dispatch: false },
 );
 
-/** Выход: завершаем сессию, закрываем хранилище и переходим на страницу входа. */
+/** Выход: сохраняем несохранённые данные, завершаем сессию, закрываем хранилище, идём на вход. */
 export const logout$ = createEffect(
-  (actions$ = inject(Actions), backend = inject(AuthBackend), router = inject(Router)) =>
+  (
+    actions$ = inject(Actions),
+    backend = inject(AuthBackend),
+    storage = inject(VaultStorage),
+    router = inject(Router),
+  ) =>
     actions$.pipe(
       ofType(AuthActions.logout),
+      // Отложенные изменения (заметки и т.п.) отправляем, пока токен ещё действителен.
+      exhaustMap(() => from(storage.flush().catch(() => undefined))),
       tap(() => {
         backend.logout();
         router.navigateByUrl('/login');
@@ -84,12 +102,25 @@ export const logout$ = createEffect(
   { functional: true },
 );
 
-/** Загрузка списка пользователей. */
+/** Сервер ответил 401 (токен истёк) — выходим из системы. */
+export const sessionExpired$ = createEffect(
+  (api = inject(ApiClient)) => api.unauthorized$.pipe(map(() => AuthActions.logout())),
+  { functional: true },
+);
+
+/** Загрузка списка пользователей (синхронно для локального режима, асинхронно для сервера). */
 export const loadUsers$ = createEffect(
   (actions$ = inject(Actions), backend = inject(AuthBackend)) =>
     actions$.pipe(
       ofType(AuthActions.loadUsers, AuthActions.loginSuccess, AuthActions.sessionRestored),
-      map(() => AuthActions.usersLoaded({ users: backend.listUsers() })),
+      // Студенту список пользователей не нужен (и сервер его не отдаст).
+      filter((action) => !('user' in action) || action.user?.role === 'admin'),
+      switchMap(() =>
+        defer(() => Promise.resolve(backend.listUsers())).pipe(
+          map((users) => AuthActions.usersLoaded({ users })),
+          catchError((e) => of(AuthActions.usersFailure({ error: message(e) }))),
+        ),
+      ),
     ),
   { functional: true },
 );
@@ -99,14 +130,12 @@ export const changeRole$ = createEffect(
   (actions$ = inject(Actions), backend = inject(AuthBackend)) =>
     actions$.pipe(
       ofType(AuthActions.changeRole),
-      map(({ userId, role }) => {
-        try {
-          backend.updateRole(userId, role);
-          return AuthActions.usersLoaded({ users: backend.listUsers() });
-        } catch (e) {
-          return AuthActions.usersFailure({ error: message(e) });
-        }
-      }),
+      concatMap(({ userId, role }) =>
+        defer(() => Promise.resolve(backend.updateRole(userId, role))).pipe(
+          map(() => AuthActions.loadUsers()),
+          catchError((e) => of(AuthActions.usersFailure({ error: message(e) }))),
+        ),
+      ),
     ),
   { functional: true },
 );
@@ -116,14 +145,12 @@ export const deleteUser$ = createEffect(
   (actions$ = inject(Actions), backend = inject(AuthBackend)) =>
     actions$.pipe(
       ofType(AuthActions.deleteUser),
-      map(({ userId }) => {
-        try {
-          backend.deleteUser(userId);
-          return AuthActions.usersLoaded({ users: backend.listUsers() });
-        } catch (e) {
-          return AuthActions.usersFailure({ error: message(e) });
-        }
-      }),
+      concatMap(({ userId }) =>
+        defer(() => Promise.resolve(backend.deleteUser(userId))).pipe(
+          map(() => AuthActions.loadUsers()),
+          catchError((e) => of(AuthActions.usersFailure({ error: message(e) }))),
+        ),
+      ),
     ),
   { functional: true },
 );
@@ -135,6 +162,7 @@ export const authEffects = {
   openUserVault$,
   redirectAfterLogin$,
   logout$,
+  sessionExpired$,
   loadUsers$,
   changeRole$,
   deleteUser$,

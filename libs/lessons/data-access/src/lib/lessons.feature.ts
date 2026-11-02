@@ -110,12 +110,19 @@ export const lessonsFeature = createFeature({
       };
     }),
 
-    on(LessonsActions.submissionSaved, (state, { submission }) => ({
-      ...state,
-      submissions: state.submissions.some((s) => s.id === submission.id)
-        ? state.submissions.map((s) => (s.id === submission.id ? submission : s))
-        : [...state.submissions, submission],
-    })),
+    // У студента одна заметка на урок: сопоставляем по id или по паре «пользователь + урок»
+    // (сервер может присвоить свой id).
+    on(LessonsActions.submissionSaved, LessonsActions.submissionSynced, (state, { submission }) => {
+      const same = (s: LessonSubmission) =>
+        s.id === submission.id ||
+        (s.userId === submission.userId && s.lessonId === submission.lessonId);
+      return {
+        ...state,
+        submissions: state.submissions.some(same)
+          ? state.submissions.map((s) => (same(s) ? submission : s))
+          : [...state.submissions, submission],
+      };
+    }),
     on(LessonsActions.submissionReviewed, (state, { id, status, comment, reviewerId, at }) => ({
       ...state,
       submissions: state.submissions.map((s) =>

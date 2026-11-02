@@ -1,6 +1,7 @@
 // NgRx-фича «flashcards»: прогресс карточек по алгоритму SM-2 и история занятий по дням.
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { CardProgress } from '@lingua/shared/models';
+import { NotesActions } from '@lingua/core/data-access';
 import { FlashcardsActions } from './flashcards.actions';
 
 /** Статистика за день. */
@@ -25,7 +26,8 @@ export const flashcardsFeature = createFeature({
   name: 'flashcards',
   reducer: createReducer(
     initialState,
-    on(FlashcardsActions.restored, (state, { state: restored }) => ({ ...state, ...restored })),
+    // Прогресс нового пользователя полностью заменяет предыдущий.
+    on(FlashcardsActions.restored, (_, { state: restored }) => ({ ...initialState, ...restored })),
     on(FlashcardsActions.cardReviewed, (state, { progress, isNew, date }) => {
       const day = state.history[date] ?? { reviewed: 0, learned: 0 };
       return {
@@ -40,6 +42,6 @@ export const flashcardsFeature = createFeature({
       const { [cardId]: _removed, ...progress } = state.progress;
       return { ...state, progress };
     }),
-    on(FlashcardsActions.progressReset, () => initialState),
+    on(FlashcardsActions.progressReset, NotesActions.vaultClosed, () => initialState),
   ),
 });

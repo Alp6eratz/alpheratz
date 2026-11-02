@@ -1,0 +1,13 @@
+# Зависимости бэкенда LinguaVault.
+# Веб-фреймворк и ASGI-сервер.
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30
+# Приём загружаемых файлов (multipart/form-data).
+python-multipart>=0.0.9
+# ORM и работа с базой данных (SQLite по умолчанию, PostgreSQL через DATABASE_URL).
+SQLAlchemy>=2.0,<3
+# Валидация данных запросов и ответов.
+pydantic>=2.7,<3
+# JWT-токены авторизации и хэширование паролей.
+PyJWT>=2.8
+bcrypt>=4.1

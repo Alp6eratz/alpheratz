@@ -1,5 +1,5 @@
 // NgRx-действия уроков, материалов, прогресса студентов, заметок к урокам и видеотеки.
-import { createActionGroup, props } from '@ngrx/store';
+import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import {
   Lesson,
   LessonMaterial,
@@ -49,6 +49,15 @@ export const LessonsActions = createActionGroup({
       reviewerId: string;
       at: string;
     }>(),
+
+    /** Сервер подтвердил сохранение заметки (с серверным id). */
+    'Submission Synced': props<{ submission: LessonSubmission }>(),
+
+    // ----- Синхронизация с сервером -----
+    /** Перезагрузить состояние с сервера (после ошибки или изменения доступа). */
+    'Reload Requested': emptyProps(),
+    /** Ошибка синхронизации с сервером. `reload` — перезагрузить состояние, чтобы отменить оптимистичное изменение. */
+    'Sync Failed': props<{ error: string; reload: boolean }>(),
 
     // ----- Видеотека -----
     'Video Added': props<{ video: VideoItem }>(),

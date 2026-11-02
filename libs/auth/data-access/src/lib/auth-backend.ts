@@ -12,12 +12,12 @@ export abstract class AuthBackend {
   abstract logout(): void;
   /** Восстанавливает сессию после перезагрузки страницы. */
   abstract restoreSession(): User | null;
-  /** Список всех пользователей (для администраторов). */
-  abstract listUsers(): User[];
+  /** Список всех пользователей (для администраторов). Может выполняться асинхронно (сервер). */
+  abstract listUsers(): User[] | Promise<User[]>;
   /** Меняет роль пользователя. */
-  abstract updateRole(userId: string, role: UserRole): User;
+  abstract updateRole(userId: string, role: UserRole): User | Promise<User>;
   /** Удаляет пользователя. */
-  abstract deleteUser(userId: string): void;
+  abstract deleteUser(userId: string): void | Promise<void>;
 }
 
 /** Код приглашения, который нужно ввести при регистрации администратора. */

@@ -34,7 +34,9 @@ export const loadVault$ = createEffect(
   (actions$ = inject(Actions), storage = inject(VaultStorage)) =>
     actions$.pipe(
       ofType(NotesActions.openVault),
-      switchMap(({ scope }) => {
+      // Сначала хранилище готовит данные пользователя (для сервера — загружает их в кэш).
+      switchMap(({ scope }) => from(storage.prepare(scope)).pipe(map(() => scope))),
+      switchMap((scope) => {
         const notes = storage.read<Note[]>(scopedKey(scope, STORAGE_KEYS.notes));
         const folders = storage.read<string[]>(scopedKey(scope, STORAGE_KEYS.folders)) ?? [];
         const workspace =
