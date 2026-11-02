@@ -1,0 +1,8 @@
+{
+  "name": "shared-models",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/models/src",
+  "prefix": "lv",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:models"]
+}

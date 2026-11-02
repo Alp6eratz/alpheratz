@@ -1,0 +1,46 @@
+{
+  "name": "lingua",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "lv",
+  "sourceRoot": "apps/lingua/src",
+  "tags": ["scope:app", "type:app"],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/lingua",
+        "browser": "apps/lingua/src/main.ts",
+        "tsConfig": "apps/lingua/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [{ "glob": "**/*", "input": "apps/lingua/public" }],
+        "styles": ["apps/lingua/src/styles.scss"]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            { "type": "initial", "maximumWarning": "1.5mb", "maximumError": "3mb" },
+            { "type": "anyComponentStyle", "maximumWarning": "8kb", "maximumError": "16kb" }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "configurations": {
+        "production": { "buildTarget": "lingua:build:production" },
+        "development": { "buildTarget": "lingua:build:development" }
+      },
+      "defaultConfiguration": "development"
+    }
+  }
+}

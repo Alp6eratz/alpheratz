@@ -1,0 +1,159 @@
+# LinguaVault 🟣
+
+**LinguaVault** — веб‑приложение для изучения иностранных языков в стиле [Obsidian](https://obsidian.md):
+хранилище Markdown‑заметок с вики‑ссылками, тегами, графом связей и интервальным повторением слов.
+
+![stack](https://img.shields.io/badge/Angular-20-dd0031) ![stack](https://img.shields.io/badge/NgRx-20-ba2bd2) ![stack](https://img.shields.io/badge/Nx-21-143055) ![stack](https://img.shields.io/badge/Material-3-7b5cf0)
+
+## Возможности
+
+| Функция | Описание |
+|---|---|
+| 📝 Markdown‑редактор | Режимы «Редактирование», «Просмотр», «Раздельный»; панель форматирования, `Ctrl+B / Ctrl+I`, Tab‑отступы |
+| 🔗 Вики‑ссылки | `[[Заметка]]`, `[[Заметка\|подпись]]`, автодополнение после `[[`, создание заметки по клику на несуществующую ссылку, автообновление ссылок при переименовании |
+| 🏷️ Теги | `#тег`, `#вложенный/тег`, панель тегов, поиск `tag:#тег` |
+| 💡 Callout‑блоки | `> [!tip] Заголовок`, `note`, `info`, `warning`, `danger`, `example`, `question`, `success` |
+| ✅ Задачи | `- [ ]` / `- [x]` — переключаются кликом прямо в режиме просмотра |
+| 🃏 Карточки (SM‑2) | Строка `слово :: перевод` в любой заметке становится карточкой; колоды по тегам, обратный режим, статистика |
+| 🔊 Озвучивание | Произношение слов через Web Speech API на выбранном изучаемом языке |
+| 🕸️ Граф | Интерактивный граф заметок и тегов (масштаб, перетаскивание, подсветка соседей) |
+| ⌨️ Палитра команд | `Ctrl+P` — все команды, `Ctrl+O` — быстрый переход / создание заметки |
+| 📅 Заметка дня | Дневник на изучаемом языке с шаблоном |
+| 🗂️ Проводник | Папки, контекстное меню, drag & drop заметок между папками |
+| 🌗 Темы | Светлая / тёмная / системная (Material 3 + палитра Obsidian) |
+| 📱 Адаптивность | На телефоне панели превращаются в выезжающие меню |
+| 💾 Данные | Локальное хранение, экспорт/импорт JSON, импорт `.md`‑файлов |
+
+## Технологии
+
+- **Angular 20** — standalone‑компоненты, сигналы, zoneless change detection, новый control flow (`@if`, `@for`)
+- **NgRx 20** — `createFeature`, `createActionGroup`, `@ngrx/entity`, функциональные эффекты, `selectSignal`
+- **RxJS** — debounce сохранения/поиска, горячие клавиши, таймеры
+- **Nx 21** — монорепозиторий из приложения и библиотек с тегами `scope:*`/`type:*`
+- **Angular Material 3** — тема `mat.theme` с `color-scheme`, адаптивная раскладка через `BreakpointObserver`
+- **marked + DOMPurify** — рендеринг Markdown с собственными расширениями и защитой от XSS
+
+## Запуск
+
+```bash
+npm install
+```
+
+```bash
+npm start            # dev‑сервер: http://localhost:4200
+```
+
+```bash
+npm run build        # production‑сборка в dist/apps/lingua
+```
+
+```bash
+npx nx graph         # граф зависимостей библиотек
+```
+
+## Архитектура
+
+```
+apps/
+  lingua/                     # приложение: конфигурация, список плагинов, глобальные стили
+libs/
+  shared/
+    models/                   # доменные типы: Note, Flashcard, AppSettings…
+    util/                     # чистые функции: разбор Markdown, SM‑2, дерево файлов
+    ui/                       # общие диалоги (ввод, подтверждение)
+  core/
+    plugin-api/               # контракты плагинов, реестр, команды, горячие клавиши
+    data-access/              # NgRx: notes / workspace / settings, эффекты, VaultFacade
+    markdown/                 # MarkdownService и расширения синтаксиса Obsidian
+  shell/feature/              # макет: лента, панели, вкладки, строка состояния, палитра, плагин «Ядро»
+  notes/feature/              # плагин «Заметки»: главная, редактор, просмотр
+  flashcards/feature/         # плагин «Карточки»: своё NgRx‑состояние, колоды, повторение
+  graph/feature/              # плагин «Граф связей»
+  settings/feature/           # плагин «Настройки»
+```
+
+### Состояние NgRx
+
+| Фича | Что хранит |
+|---|---|
+| `notes` | заметки (`EntityState<Note>`), явно созданные папки |
+| `workspace` | открытые вкладки и их режимы, активная заметка, состояние панелей, поисковый запрос |
+| `settings` | тема, язык, размер шрифта, лимит новых карточек, отключённые плагины |
+| `flashcards` | прогресс SM‑2 по каждой карточке, история занятий (регистрируется плагином) |
+
+Все производные данные (теги, ссылки, обратные ссылки, граф, дерево файлов, карточки) вычисляются
+мемоизированными селекторами. Сохранение — эффекты с `debounceTime` через абстракцию `VaultStorage`
+(по умолчанию `localStorage`; можно заменить на IndexedDB или сервер: `provideCoreState({ storage: MyStorage })`).
+
+## Расширяемость: как написать плагин
+
+Любая функция приложения — это объект `LinguaPlugin`. Плагин может добавить:
+
+- `routes` — лениво загружаемые страницы;
+- `commands` — команды палитры и горячие клавиши (внутри `run` доступен `inject()`);
+- `ribbon` — кнопки на ленте слева;
+- `sidebarViews` — виды левой/правой панели;
+- `statusBar` — элементы строки состояния;
+- `markdownExtensions` — новый синтаксис Markdown (расширения `marked`);
+- `providers` — собственное NgRx‑состояние, эффекты, сервисы.
+
+Пример — плагин «Слово дня»:
+
+```ts
+// libs/word-of-day/feature/src/lib/word-of-day.plugin.ts
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { definePlugin } from '@lingua/core/plugin-api';
+
+export const wordOfDayPlugin = definePlugin({
+  id: 'word-of-day',
+  name: 'Слово дня',
+  description: 'Показывает случайное слово из ваших карточек.',
+  version: '1.0.0',
+  icon: 'auto_awesome',
+  routes: [{ path: 'word', loadComponent: () => import('./word.component').then((m) => m.WordComponent) }],
+  ribbon: [{ id: 'word:ribbon', icon: 'auto_awesome', tooltip: 'Слово дня', route: '/word' }],
+  commands: [{ id: 'word:open', name: 'Слово дня: открыть', run: () => inject(Router).navigateByUrl('/word') }],
+});
+```
+
+Затем добавьте плагин в `apps/lingua/src/app/plugins.ts`:
+
+```ts
+export const APP_PLUGINS = [corePlugin, notesPlugin, flashcardsPlugin, graphPlugin, settingsPlugin, wordOfDayPlugin];
+```
+
+Плагины без флага `core` можно отключать на странице настроек — их маршруты (через `canMatch`),
+кнопки, команды и Markdown‑расширения сразу исчезают.
+
+## Синтаксис заметок
+
+```markdown
+#английский #глаголы
+
+> [!tip] Совет
+> Учите слова во фразах.
+
+- go — went — gone :: идти
+- see — saw — seen :: видеть
+
+==Важно==: смотрите также [[Неправильные глаголы]].
+
+- [ ] выучить 10 слов
+```
+
+## Горячие клавиши
+
+| Сочетание | Действие |
+|---|---|
+| `Ctrl+P` | Палитра команд |
+| `Ctrl+O` | Быстрый переход к заметке |
+| `Ctrl+E` | Переключить режим редактирования/просмотра |
+| `Ctrl+Shift+F` | Поиск по хранилищу |
+| `Alt+N` | Новая заметка |
+| `Alt+D` | Заметка дня |
+| `Alt+W` | Закрыть вкладку |
+| `Alt+R` | Начать повторение карточек |
+| `Alt+G` | Граф связей |
+| `Ctrl+,` | Настройки |
+| `Пробел`, `1`–`4`, `S` | Показать ответ, оценить, озвучить (в режиме повторения) |

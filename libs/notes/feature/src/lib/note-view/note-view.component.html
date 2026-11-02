@@ -1,0 +1,54 @@
+<!-- Страница заметки. -->
+@if (note(); as n) {
+  <div class="note" [class]="'mode-' + currentMode()">
+    @if (currentMode() !== 'preview') {
+      <section class="pane editor-pane">
+        @if (currentMode() === 'edit') {
+          <input
+            class="inline-title compact"
+            [value]="n.title"
+            (blur)="rename($any($event.target))"
+            (keydown.enter)="$any($event.target).blur()"
+            aria-label="Заголовок заметки"
+          />
+        }
+        <lv-markdown-editor
+          [value]="draft()"
+          (valueInput)="draft.set($event)"
+          (valueChange)="save($event)"
+        />
+      </section>
+    }
+    @if (currentMode() !== 'edit') {
+      <section class="pane preview-pane">
+        <div class="page">
+          @if (breadcrumbs().length) {
+            <nav class="breadcrumbs" aria-label="Папка">
+              @for (part of breadcrumbs(); track $index) {
+                <span>{{ part }}</span>
+                @if (!$last) {
+                  <span class="sep">/</span>
+                }
+              }
+            </nav>
+          }
+          <input
+            class="inline-title"
+            [value]="n.title"
+            (blur)="rename($any($event.target))"
+            (keydown.enter)="$any($event.target).blur()"
+            aria-label="Заголовок заметки"
+          />
+          <lv-markdown-preview [content]="draft()" (contentChange)="onPreviewChange($event)" />
+        </div>
+      </section>
+    }
+  </div>
+} @else if (vault.loaded()) {
+  <div class="missing">
+    <mat-icon>search_off</mat-icon>
+    <h2>Заметка не найдена</h2>
+    <p>Возможно, она была удалена или переименована.</p>
+    <a mat-flat-button routerLink="/">На главную</a>
+  </div>
+}

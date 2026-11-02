@@ -1,0 +1,67 @@
+<!-- Стартовая страница. -->
+<div class="home">
+  <header class="hero">
+    <div class="flag">{{ language().flag }}</div>
+    <div>
+      <h1>{{ greeting() }}!</h1>
+      <p>
+        Вы изучаете: <strong>{{ language().label }}</strong
+        >. Пишите заметки, связывайте их и повторяйте слова каждый день.
+      </p>
+    </div>
+  </header>
+
+  <section class="stats">
+    @for (s of stats(); track s.label) {
+      <mat-card appearance="outlined" class="stat">
+        <mat-icon>{{ s.icon }}</mat-icon>
+        <div class="value">{{ s.value }}</div>
+        <div class="label">{{ s.label }}</div>
+      </mat-card>
+    }
+  </section>
+
+  <section class="actions">
+    <button mat-flat-button (click)="newNote()"><mat-icon>note_add</mat-icon>Новая заметка</button>
+    <button mat-stroked-button (click)="vault.openDailyNote()">
+      <mat-icon>calendar_today</mat-icon>Заметка дня
+    </button>
+    @if (hasFlashcards()) {
+      <button mat-stroked-button (click)="commands.execute('flashcards:review')">
+        <mat-icon>style</mat-icon>Повторить слова
+      </button>
+    }
+    <button mat-stroked-button (click)="commands.execute('core:command-palette')">
+      <mat-icon>terminal</mat-icon>Команды
+    </button>
+  </section>
+
+  <div class="columns">
+    <section>
+      <h2>Недавние заметки</h2>
+      <div class="recent">
+        @for (n of vault.recent(); track n.id) {
+          <button class="recent-item" (click)="vault.open(n.id)">
+            <mat-icon>description</mat-icon>
+            <span class="title">{{ n.title }}</span>
+            <span class="date">{{ n.updatedAt | date: 'd MMM, HH:mm' }}</span>
+          </button>
+        } @empty {
+          <p class="muted">Заметок пока нет.</p>
+        }
+      </div>
+    </section>
+    <section>
+      <h2>Теги</h2>
+      <div class="tags">
+        @for (t of vault.tags(); track t.tag) {
+          <button class="lv-tag" (click)="vault.search('tag:#' + t.tag)">
+            #{{ t.tag }} <small>{{ t.count }}</small>
+          </button>
+        } @empty {
+          <p class="muted">Добавьте #тег в заметку.</p>
+        }
+      </div>
+    </section>
+  </div>
+</div>

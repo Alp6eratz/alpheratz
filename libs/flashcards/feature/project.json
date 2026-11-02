@@ -1,0 +1,8 @@
+{
+  "name": "flashcards-feature",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/flashcards/feature/src",
+  "prefix": "lv",
+  "projectType": "library",
+  "tags": ["scope:flashcards", "type:feature"]
+}

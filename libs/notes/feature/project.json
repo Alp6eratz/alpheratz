@@ -1,0 +1,8 @@
+{
+  "name": "notes-feature",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/notes/feature/src",
+  "prefix": "lv",
+  "projectType": "library",
+  "tags": ["scope:notes", "type:feature"]
+}

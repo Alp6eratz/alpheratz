@@ -1,0 +1,150 @@
+<!-- Страница настроек приложения. -->
+<div class="page">
+  <h1>Настройки</h1>
+
+  <!-- Внешний вид -->
+  <mat-card appearance="outlined" class="section">
+    <h2><mat-icon>palette</mat-icon>Внешний вид</h2>
+    <div class="row">
+      <div class="info">
+        <div class="name">Тема</div>
+        <div class="desc">Светлая, тёмная или как в системе</div>
+      </div>
+      <mat-button-toggle-group
+        [value]="settings().theme"
+        (change)="update('theme', $event.value)"
+        hideSingleSelectionIndicator
+      >
+        <mat-button-toggle value="light"><mat-icon>light_mode</mat-icon></mat-button-toggle>
+        <mat-button-toggle value="dark"><mat-icon>dark_mode</mat-icon></mat-button-toggle>
+        <mat-button-toggle value="system"><mat-icon>computer</mat-icon></mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+    <div class="row">
+      <div class="info">
+        <div class="name">Размер шрифта редактора</div>
+        <div class="desc">{{ settings().editorFontSize }} px</div>
+      </div>
+      <mat-slider min="12" max="24" step="1" discrete class="slider">
+        <input
+          matSliderThumb
+          [value]="settings().editorFontSize"
+          (valueChange)="update('editorFontSize', $event)"
+        />
+      </mat-slider>
+    </div>
+    <div class="row">
+      <div class="info">
+        <div class="name">Режим по умолчанию</div>
+        <div class="desc">Как открываются заметки</div>
+      </div>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="select">
+        <mat-select
+          [value]="settings().defaultEditorMode"
+          (valueChange)="update('defaultEditorMode', $event)"
+        >
+          <mat-option value="preview">Просмотр</mat-option>
+          <mat-option value="edit">Редактирование</mat-option>
+          <mat-option value="split">Раздельный</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <!-- Обучение -->
+  <mat-card appearance="outlined" class="section">
+    <h2><mat-icon>school</mat-icon>Обучение</h2>
+    <div class="row">
+      <div class="info">
+        <div class="name">Изучаемый язык</div>
+        <div class="desc">Используется для озвучивания слов</div>
+      </div>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="select">
+        <mat-select
+          [value]="settings().targetLanguage"
+          (valueChange)="update('targetLanguage', $event)"
+        >
+          @for (lang of languages; track lang.code) {
+            <mat-option [value]="lang.code">{{ lang.flag }} {{ lang.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="row">
+      <div class="info">
+        <div class="name">Новых карточек в день</div>
+        <div class="desc">{{ settings().newCardsPerDay }}</div>
+      </div>
+      <mat-slider min="5" max="100" step="5" discrete class="slider">
+        <input
+          matSliderThumb
+          [value]="settings().newCardsPerDay"
+          (valueChange)="update('newCardsPerDay', $event)"
+        />
+      </mat-slider>
+    </div>
+  </mat-card>
+
+  <!-- Плагины -->
+  <mat-card appearance="outlined" class="section">
+    <h2><mat-icon>extension</mat-icon>Плагины</h2>
+    @for (plugin of registry.all; track plugin.id) {
+      <div class="row">
+        <mat-icon class="plugin-icon">{{ plugin.icon }}</mat-icon>
+        <div class="info">
+          <div class="name">
+            {{ plugin.name }} <span class="version">v{{ plugin.version }}</span>
+            @if (plugin.core) {
+              <span class="core">системный</span>
+            }
+          </div>
+          <div class="desc">{{ plugin.description }}</div>
+        </div>
+        <mat-slide-toggle
+          [checked]="plugin.core || isEnabled(plugin.id)"
+          [disabled]="plugin.core"
+          (change)="togglePlugin(plugin.id, $event.checked)"
+          [aria-label]="plugin.name"
+        />
+      </div>
+    }
+  </mat-card>
+
+  <!-- Горячие клавиши -->
+  <mat-card appearance="outlined" class="section">
+    <h2><mat-icon>keyboard</mat-icon>Горячие клавиши</h2>
+    @for (h of hotkeys(); track h.name) {
+      <div class="row compact">
+        <div class="info">
+          <div class="name">{{ h.name }}</div>
+        </div>
+        <kbd>{{ h.hotkey }}</kbd>
+      </div>
+    }
+  </mat-card>
+
+  <!-- Данные -->
+  <mat-card appearance="outlined" class="section">
+    <h2><mat-icon>database</mat-icon>Данные</h2>
+    <p class="desc">Заметки хранятся локально в браузере. Делайте резервные копии через экспорт.</p>
+    <div class="buttons">
+      <button mat-stroked-button (click)="exportVault()">
+        <mat-icon>download</mat-icon>Экспорт (JSON)
+      </button>
+      <button mat-stroked-button (click)="fileInput.click()">
+        <mat-icon>upload</mat-icon>Импорт JSON / .md
+      </button>
+      <input
+        #fileInput
+        type="file"
+        hidden
+        multiple
+        accept=".json,.md,.markdown,.txt"
+        (change)="importFiles(fileInput)"
+      />
+      <button mat-button class="danger" (click)="reset()">
+        <mat-icon>restart_alt</mat-icon>Сбросить к демо
+      </button>
+    </div>
+  </mat-card>
+</div>

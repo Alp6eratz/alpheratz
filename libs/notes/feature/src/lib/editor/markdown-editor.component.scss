@@ -1,0 +1,98 @@
+// Стили редактора: моноширинный шрифт, плавающие подсказки ссылок.
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  gap: 2px;
+  padding: 4px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--lv-border);
+  flex-shrink: 0;
+  button {
+    --mat-icon-button-state-layer-size: 32px;
+    padding: 4px;
+    color: var(--lv-text-muted);
+    flex-shrink: 0;
+  }
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.area {
+  flex: 1;
+  width: 100%;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--lv-text);
+  caret-color: var(--lv-accent);
+  font-family: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Menlo, monospace;
+  font-size: var(--lv-editor-font-size, 16px);
+  line-height: 1.7;
+  padding: 24px max(24px, calc((100% - 760px) / 2)) 40vh;
+  tab-size: 2;
+  &::placeholder {
+    color: var(--lv-text-faint);
+  }
+}
+
+.suggestions {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 16px;
+  width: min(420px, 92%);
+  background: var(--lv-bg-secondary);
+  border: 1px solid var(--lv-border);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  padding: 6px;
+  z-index: 5;
+}
+.suggestions-title {
+  font-size: 0.72rem;
+  color: var(--lv-text-faint);
+  padding: 4px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.suggestion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--lv-text);
+  font: inherit;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--lv-text-muted);
+  }
+  .folder {
+    margin-left: auto;
+    color: var(--lv-text-faint);
+    font-size: 0.78rem;
+  }
+  &.selected,
+  &:hover {
+    background: var(--lv-hover);
+  }
+}

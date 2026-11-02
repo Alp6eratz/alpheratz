@@ -1,0 +1,44 @@
+<!-- Панель форматирования (прокручивается горизонтально на узких экранах). -->
+<div class="toolbar" role="toolbar" aria-label="Форматирование">
+  @for (action of actions; track action.icon) {
+    <button
+      mat-icon-button
+      [matTooltip]="action.tooltip"
+      (mousedown)="$event.preventDefault()"
+      (click)="apply(action)"
+    >
+      <mat-icon>{{ action.icon }}</mat-icon>
+    </button>
+  }
+</div>
+
+<!-- Поле редактирования. -->
+<textarea
+  #area
+  class="area"
+  spellcheck="true"
+  placeholder="Начните писать… Используйте [[ для ссылок, # для тегов и «слово :: перевод» для карточек"
+  (input)="onInput()"
+  (keydown)="onKeydown($event)"
+  (blur)="linkQuery.set(null)"
+></textarea>
+
+<!-- Подсказки автодополнения вики-ссылок. -->
+@if (suggestions().length) {
+  <div class="suggestions" role="listbox">
+    <div class="suggestions-title">Ссылка на заметку</div>
+    @for (note of suggestions(); track note.id; let i = $index) {
+      <button
+        class="suggestion"
+        role="option"
+        [class.selected]="i === suggestionIndex()"
+        (mousedown)="$event.preventDefault(); completeLink(note.title)"
+      >
+        <mat-icon>description</mat-icon>{{ note.title }}
+        @if (note.folder) {
+          <span class="folder">{{ note.folder }}</span>
+        }
+      </button>
+    }
+  </div>
+}

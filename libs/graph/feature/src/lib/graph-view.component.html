@@ -1,0 +1,61 @@
+<!-- Граф связей: панель управления + SVG-холст. -->
+<div class="graph">
+  <div class="controls">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter">
+      <mat-icon matPrefix>filter_alt</mat-icon>
+      <input
+        matInput
+        placeholder="Фильтр"
+        [ngModel]="filter()"
+        (ngModelChange)="filter.set($event)"
+      />
+    </mat-form-field>
+    <mat-slide-toggle [checked]="showTags()" (change)="showTags.set($event.checked)"
+      >Теги</mat-slide-toggle
+    >
+    <button mat-icon-button matTooltip="Сбросить вид" (click)="resetView()">
+      <mat-icon>center_focus_strong</mat-icon>
+    </button>
+  </div>
+
+  <svg
+    #svg
+    class="canvas"
+    viewBox="-360 -250 720 500"
+    preserveAspectRatio="xMidYMid meet"
+    (wheel)="onWheel($event, svg)"
+    (pointerdown)="onBackgroundDown($event)"
+    (pointermove)="onMove($event)"
+    (pointerup)="onUp()"
+    (pointerleave)="onUp()"
+  >
+    <g [attr.transform]="transform()">
+      @for (e of drawEdges(); track e.key) {
+        <line
+          class="edge"
+          [class.active]="edgeActive(e.source, e.target)"
+          [attr.x1]="e.x1"
+          [attr.y1]="e.y1"
+          [attr.x2]="e.x2"
+          [attr.y2]="e.y2"
+        />
+      }
+      @for (n of drawNodes(); track n.id) {
+        <g
+          class="node"
+          [class]="nodeState(n.id, n.label)"
+          [class.tag]="n.isTag"
+          [attr.transform]="'translate(' + n.x + ' ' + n.y + ')'"
+          (pointerdown)="onNodeDown($event, n.id)"
+          (pointerenter)="hovered.set(n.id)"
+          (pointerleave)="hovered.set(null)"
+          (click)="onNodeClick(n.id)"
+        >
+          <circle [attr.r]="n.r" [attr.fill]="n.color" />
+          <text [attr.y]="n.r + 13">{{ n.label }}</text>
+        </g>
+      }
+    </g>
+  </svg>
+  <div class="legend">Колесо — масштаб · перетаскивание — перемещение · клик — открыть заметку</div>
+</div>

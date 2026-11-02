@@ -1,0 +1,74 @@
+<!-- Сессия повторения карточек. -->
+<div class="review">
+  <div class="top">
+    <a mat-icon-button routerLink="/flashcards" aria-label="Назад к колодам"
+      ><mat-icon>arrow_back</mat-icon></a
+    >
+    <mat-progress-bar mode="determinate" [value]="progress()" />
+    <span class="counter">{{ queue().length }}</span>
+  </div>
+
+  @if (current(); as card) {
+    <div class="card" [class.revealed]="revealed()" (click)="!revealed() && reveal()">
+      <div class="side question">
+        <span class="text" [innerHTML]="question()"></span>
+        @if (!isReverse()) {
+          <button
+            mat-icon-button
+            class="speak"
+            (click)="$event.stopPropagation(); speakCurrent()"
+            aria-label="Произнести"
+          >
+            <mat-icon>volume_up</mat-icon>
+          </button>
+        }
+      </div>
+      @if (revealed()) {
+        <div class="divider"></div>
+        <div class="side answer">
+          <span class="text" [innerHTML]="answer()"></span>
+          @if (isReverse()) {
+            <button
+              mat-icon-button
+              class="speak"
+              (click)="$event.stopPropagation(); speakCurrent()"
+              aria-label="Произнести"
+            >
+              <mat-icon>volume_up</mat-icon>
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="hint">Нажмите, чтобы увидеть ответ <kbd>Пробел</kbd></div>
+      }
+      @if (sourceNote(); as note) {
+        <button class="source" (click)="$event.stopPropagation(); vault.open(note.id)">
+          <mat-icon>description</mat-icon>{{ note.title }}
+        </button>
+      }
+    </div>
+
+    <div class="grades" [class.hidden]="!revealed()">
+      @for (g of grades; track g.grade) {
+        <button mat-flat-button [class]="g.cls" [disabled]="!revealed()" (click)="rate(g.grade)">
+          <span class="g-label">{{ g.label }}</span>
+          <span class="g-interval">{{ intervals()[g.grade] }} · {{ g.key }}</span>
+        </button>
+      }
+    </div>
+  } @else if (done()) {
+    <div class="finish">
+      <mat-icon>celebration</mat-icon>
+      <h2>Занятие завершено!</h2>
+      <p>Ответов: {{ answered() }} · правильно с первого раза или после повтора: {{ correct() }}</p>
+      <a mat-flat-button routerLink="/flashcards">К колодам</a>
+    </div>
+  } @else if (empty()) {
+    <div class="finish">
+      <mat-icon>task_alt</mat-icon>
+      <h2>На сегодня всё</h2>
+      <p>В этой колоде нет карточек к повторению. Возвращайтесь позже или добавьте новые слова.</p>
+      <a mat-flat-button routerLink="/flashcards">К колодам</a>
+    </div>
+  }
+</div>

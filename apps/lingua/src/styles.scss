@@ -1,0 +1,314 @@
+// Глобальные стили: тема Angular Material 3, палитра в стиле Obsidian (светлая/тёмная)
+// и оформление отрендеренного Markdown.
+@use '@angular/material' as mat;
+
+// ---------- Тема Angular Material ----------
+html {
+  // theme-type: color-scheme — цвета переключаются CSS-свойством color-scheme (см. ThemeService).
+  color-scheme: dark;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$violet-palette,
+        tertiary: mat.$cyan-palette,
+        theme-type: color-scheme,
+      ),
+      typography: (
+        plain-family: 'Inter, system-ui, sans-serif',
+        brand-family: 'Inter, system-ui, sans-serif',
+      ),
+      density: 0,
+    )
+  );
+  // Поверхности Material подгоняем под палитру Obsidian.
+  @include mat.theme-overrides(
+    (
+      surface: light-dark(#ffffff, #1e1e1e),
+      surface-container: light-dark(#f6f6f6, #262626),
+      surface-container-low: light-dark(#fafafa, #232323),
+      surface-container-high: light-dark(#f0f0f0, #2b2b2b),
+      surface-container-highest: light-dark(#eaeaea, #303030),
+      outline-variant: light-dark(#e3e3e3, #3a3a3a),
+    )
+  );
+  // Боковые панели без скруглений — как в Obsidian.
+  @include mat.sidenav-overrides(
+    (
+      container-shape: 0,
+      container-divider-color: transparent,
+    )
+  );
+}
+
+// ---------- Переменные палитры приложения ----------
+:root {
+  --lv-bg: light-dark(#ffffff, #1e1e1e);
+  --lv-bg-secondary: light-dark(#f6f6f6, #262626);
+  --lv-border: light-dark(#e3e3e3, #363636);
+  --lv-border-strong: light-dark(#cfcfcf, #4a4a4a);
+  --lv-text: light-dark(#222222, #dadada);
+  --lv-text-muted: light-dark(#5c5c5c, #a3a3a3);
+  --lv-text-faint: light-dark(#9a9a9a, #6f6f6f);
+  --lv-hover: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.07));
+  --lv-active: light-dark(rgba(124, 92, 252, 0.14), rgba(138, 108, 250, 0.22));
+  --lv-accent: light-dark(#7b5cf0, #a28bfa);
+  --lv-code-bg: light-dark(#f3f1fa, #2a2a2e);
+  --lv-mark: light-dark(#fff3a3, rgba(255, 208, 0, 0.32));
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  background: var(--lv-bg);
+  color: var(--lv-text);
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: var(--lv-accent);
+}
+
+// Тонкие полосы прокрутки, как в Obsidian.
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--lv-border-strong) transparent;
+}
+
+// Панель палитры команд.
+.lv-palette-panel .mat-mdc-dialog-surface {
+  padding: 0;
+  border-radius: 12px !important;
+  background: var(--lv-bg-secondary);
+}
+
+// ---------- Теги (используются и вне Markdown) ----------
+.lv-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--lv-active);
+  color: var(--lv-accent);
+  font-size: 0.85em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+// ---------- Отрендеренный Markdown ----------
+.lv-markdown-body {
+  font-size: var(--lv-editor-font-size, 16px);
+  line-height: 1.7;
+  word-wrap: break-word;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    line-height: 1.3;
+    margin: 1.4em 0 0.5em;
+    font-weight: 700;
+    scroll-margin-top: 16px;
+  }
+  h1 {
+    font-size: 1.8em;
+  }
+  h2 {
+    font-size: 1.45em;
+  }
+  h3 {
+    font-size: 1.2em;
+  }
+  > :first-child {
+    margin-top: 0;
+  }
+  p {
+    margin: 0.6em 0;
+  }
+  ul,
+  ol {
+    padding-left: 1.6em;
+  }
+  li {
+    margin: 0.2em 0;
+  }
+  li:has(> input.lv-task) {
+    list-style: none;
+    margin-left: -1.3em;
+  }
+  input.lv-task {
+    accent-color: var(--lv-accent);
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.1em;
+    cursor: pointer;
+  }
+  mark {
+    background: var(--lv-mark);
+    color: inherit;
+    padding: 0 2px;
+    border-radius: 3px;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid var(--lv-border);
+    margin: 1.5em 0;
+  }
+  img {
+    max-width: 100%;
+    border-radius: 6px;
+  }
+  code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.88em;
+    background: var(--lv-code-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+  pre {
+    background: var(--lv-code-bg);
+    padding: 12px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+  blockquote {
+    margin: 1em 0;
+    padding: 0.2em 1em;
+    border-left: 3px solid var(--lv-accent);
+    color: var(--lv-text-muted);
+  }
+  table {
+    border-collapse: collapse;
+    display: block;
+    overflow-x: auto;
+    margin: 1em 0;
+  }
+  th,
+  td {
+    border: 1px solid var(--lv-border);
+    padding: 6px 12px;
+    text-align: left;
+  }
+  th {
+    background: var(--lv-bg-secondary);
+  }
+
+  // Вики-ссылки: существующие — акцентным цветом, несуществующие — приглушённо.
+  .lv-wikilink {
+    color: var(--lv-accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    &:hover {
+      border-bottom-color: currentColor;
+    }
+  }
+  .lv-wikilink.lv-unresolved {
+    opacity: 0.6;
+  }
+
+  // Callout-блоки.
+  .lv-callout {
+    --c: #4c8dde;
+    margin: 1em 0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--c) 12%, transparent);
+    border-left: 3px solid var(--c);
+    .lv-callout-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: var(--c);
+      .material-symbols-outlined {
+        font-size: 1.15em;
+      }
+    }
+    .lv-callout-content > :first-child {
+      margin-top: 0.3em;
+    }
+    .lv-callout-content > :last-child {
+      margin-bottom: 0;
+    }
+  }
+  .lv-callout-tip,
+  .lv-callout-success {
+    --c: #3fb27f;
+  }
+  .lv-callout-warning {
+    --c: #d99a1e;
+  }
+  .lv-callout-danger {
+    --c: #e5534b;
+  }
+  .lv-callout-example {
+    --c: #9b6cf2;
+  }
+  .lv-callout-question {
+    --c: #d97b1e;
+  }
+
+  // Карточки «слово :: перевод» (плагин «Карточки»).
+  .lv-flashcard {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 4px 12px 4px 4px;
+    margin: 3px 0;
+    border-radius: 8px;
+    background: var(--lv-bg-secondary);
+    border: 1px solid var(--lv-border);
+    .lv-front {
+      font-weight: 600;
+    }
+    .lv-sep {
+      color: var(--lv-text-faint);
+    }
+    .lv-back {
+      color: var(--lv-text-muted);
+      min-width: 0;
+    }
+    .lv-speak {
+      flex-shrink: 0;
+    }
+  }
+  // Элементы списка с карточкой — без маркера.
+  li:has(> .lv-flashcard) {
+    list-style: none;
+    margin-left: -1.3em;
+  }
+  .lv-speak {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--lv-accent);
+    cursor: pointer;
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+    &:hover {
+      background: var(--lv-hover);
+    }
+  }
+}
