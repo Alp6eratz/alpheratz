@@ -38,6 +38,7 @@ export const notesFeature = createFeature({
     on(NotesActions.vaultLoaded, NotesActions.vaultImported, (state, { notes, folders }) =>
       notesAdapter.setAll(notes, { ...state, folders, loaded: true }),
     ),
+    on(NotesActions.vaultClosed, () => initialState),
     on(NotesActions.noteCreated, (state, { note }) => notesAdapter.addOne(note, state)),
     on(NotesActions.contentChanged, (state, { id, content, updatedAt }) =>
       notesAdapter.updateOne({ id, changes: { content, updatedAt } }, state),

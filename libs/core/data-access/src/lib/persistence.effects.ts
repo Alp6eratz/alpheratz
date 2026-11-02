@@ -6,12 +6,13 @@ import { Store } from '@ngrx/store';
 import { AppSettings, Note } from '@lingua/shared/models';
 import {
   debounceTime,
-  defer,
   distinctUntilChanged,
+  EMPTY,
   filter,
   from,
   map,
   skip,
+  switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -20,29 +21,35 @@ import { notesFeature, selectAllNotes } from './notes/notes.feature';
 import { createSeedNotes, SEED_FOLDERS } from './seed/seed-notes';
 import { SettingsActions } from './settings/settings.actions';
 import { settingsFeature } from './settings/settings.feature';
-import { STORAGE_KEYS, VaultStorage } from './storage/vault-storage';
+import { scopedKey, STORAGE_KEYS, VaultStorage } from './storage/vault-storage';
 import { WorkspaceActions } from './workspace/workspace.actions';
 import { WorkspaceState, workspaceFeature } from './workspace/workspace.feature';
 
 /**
- * При регистрации эффекта читает все данные из хранилища; при первом запуске создаёт демо-заметки.
- * Используется `defer`, а не ROOT_EFFECTS_INIT: так загрузка не зависит от порядка `provideEffects`.
+ * Открытие хранилища пользователя: читает его заметки, раскладку и настройки.
+ * Данные каждого пользователя хранятся под своим префиксом (`scope` = id пользователя).
+ * При первом входе пользователь получает демонстрационные заметки.
  */
 export const loadVault$ = createEffect(
-  (storage = inject(VaultStorage)) =>
-    defer(() => {
-      const notes = storage.read<Note[]>(STORAGE_KEYS.notes);
-      const folders = storage.read<string[]>(STORAGE_KEYS.folders) ?? [];
-      const workspace = storage.read<Partial<WorkspaceState>>(STORAGE_KEYS.workspace) ?? {};
-      const settings = storage.read<Partial<AppSettings>>(STORAGE_KEYS.settings) ?? {};
-      return from([
-        SettingsActions.restored({ settings }),
-        WorkspaceActions.restored({ state: workspace }),
-        notes
-          ? NotesActions.vaultLoaded({ notes, folders })
-          : NotesActions.vaultLoaded({ notes: createSeedNotes(), folders: SEED_FOLDERS }),
-      ]);
-    }),
+  (actions$ = inject(Actions), storage = inject(VaultStorage)) =>
+    actions$.pipe(
+      ofType(NotesActions.openVault),
+      switchMap(({ scope }) => {
+        const notes = storage.read<Note[]>(scopedKey(scope, STORAGE_KEYS.notes));
+        const folders = storage.read<string[]>(scopedKey(scope, STORAGE_KEYS.folders)) ?? [];
+        const workspace =
+          storage.read<Partial<WorkspaceState>>(scopedKey(scope, STORAGE_KEYS.workspace)) ?? {};
+        const settings =
+          storage.read<Partial<AppSettings>>(scopedKey(scope, STORAGE_KEYS.settings)) ?? {};
+        return from([
+          SettingsActions.restored({ settings }),
+          WorkspaceActions.restored({ state: workspace }),
+          notes
+            ? NotesActions.vaultLoaded({ scope, notes, folders })
+            : NotesActions.vaultLoaded({ scope, notes: createSeedNotes(), folders: SEED_FOLDERS }),
+        ]);
+      }),
+    ),
   { functional: true },
 );
 
@@ -56,48 +63,78 @@ export const resetVault$ = createEffect(
   { functional: true },
 );
 
+/**
+ * Поток текущей области хранения: id пользователя после загрузки его хранилища, null после выхода.
+ * Все эффекты сохранения переключаются (switchMap) при смене пользователя,
+ * поэтому данные одного пользователя никогда не попадут в хранилище другого.
+ */
+function currentScope$(actions$: Actions) {
+  return actions$.pipe(
+    ofType(NotesActions.vaultLoaded, NotesActions.vaultClosed),
+    map((action) => ('scope' in action ? action.scope : null)),
+  );
+}
+
 /** Сохраняет заметки и папки с задержкой (debounce), чтобы не писать на каждый символ. */
 export const persistNotes$ = createEffect(
-  (store = inject(Store), storage = inject(VaultStorage)) =>
-    store.select(notesFeature.selectNotesState).pipe(
-      filter((s) => s.loaded),
-      debounceTime(400),
-      withLatestFrom(store.select(selectAllNotes)),
-      tap(([state, notes]) => {
-        storage.write(STORAGE_KEYS.notes, notes);
-        storage.write(STORAGE_KEYS.folders, state.folders);
-      }),
+  (actions$ = inject(Actions), store = inject(Store), storage = inject(VaultStorage)) =>
+    currentScope$(actions$).pipe(
+      switchMap((scope) =>
+        !scope
+          ? EMPTY
+          : store.select(notesFeature.selectNotesState).pipe(
+              filter((s) => s.loaded),
+              debounceTime(400),
+              withLatestFrom(store.select(selectAllNotes)),
+              tap(([state, notes]) => {
+                storage.write(scopedKey(scope, STORAGE_KEYS.notes), notes);
+                storage.write(scopedKey(scope, STORAGE_KEYS.folders), state.folders);
+              }),
+            ),
+      ),
     ),
   { functional: true, dispatch: false },
 );
 
 /** Сохраняет раскладку рабочей области. */
 export const persistWorkspace$ = createEffect(
-  (store = inject(Store), storage = inject(VaultStorage)) =>
-    store.select(workspaceFeature.selectWorkspaceState).pipe(
-      skip(1),
-      debounceTime(300),
-      // Поисковый запрос и активную заметку не сохраняем — активную определяет URL.
-      map(({ tabs, leftOpen, rightOpen, leftView, rightView }) => ({
-        tabs,
-        leftOpen,
-        rightOpen,
-        leftView,
-        rightView,
-      })),
-      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
-      tap((state) => storage.write(STORAGE_KEYS.workspace, state)),
+  (actions$ = inject(Actions), store = inject(Store), storage = inject(VaultStorage)) =>
+    currentScope$(actions$).pipe(
+      switchMap((scope) =>
+        !scope
+          ? EMPTY
+          : store.select(workspaceFeature.selectWorkspaceState).pipe(
+              skip(1),
+              debounceTime(300),
+              // Поисковый запрос и активную заметку не сохраняем — активную определяет URL.
+              map(({ tabs, leftOpen, rightOpen, leftView, rightView }) => ({
+                tabs,
+                leftOpen,
+                rightOpen,
+                leftView,
+                rightView,
+              })),
+              distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+              tap((state) => storage.write(scopedKey(scope, STORAGE_KEYS.workspace), state)),
+            ),
+      ),
     ),
   { functional: true, dispatch: false },
 );
 
 /** Сохраняет настройки. */
 export const persistSettings$ = createEffect(
-  (store = inject(Store), storage = inject(VaultStorage)) =>
-    store.select(settingsFeature.selectSettingsState).pipe(
-      skip(1),
-      debounceTime(200),
-      tap((settings) => storage.write(STORAGE_KEYS.settings, settings)),
+  (actions$ = inject(Actions), store = inject(Store), storage = inject(VaultStorage)) =>
+    currentScope$(actions$).pipe(
+      switchMap((scope) =>
+        !scope
+          ? EMPTY
+          : store.select(settingsFeature.selectSettingsState).pipe(
+              skip(1),
+              debounceTime(200),
+              tap((settings) => storage.write(scopedKey(scope, STORAGE_KEYS.settings), settings)),
+            ),
+      ),
     ),
   { functional: true, dispatch: false },
 );

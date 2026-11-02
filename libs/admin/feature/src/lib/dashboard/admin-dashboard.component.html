@@ -1,0 +1,204 @@
+<!-- Панель администратора. -->
+<div class="page">
+  <header class="head">
+    <h1>Администрирование</h1>
+    <a mat-stroked-button routerLink="/lessons"><mat-icon>school</mat-icon>Управление уроками</a>
+  </header>
+
+  <section class="summary">
+    @for (s of summary(); track s.label) {
+      <div class="tile">
+        <mat-icon>{{ s.icon }}</mat-icon>
+        <div class="value">{{ s.value }}</div>
+        <div class="label">{{ s.label }}</div>
+      </div>
+    }
+  </section>
+
+  <mat-tab-group
+    [selectedIndex]="tabIndex()"
+    (selectedIndexChange)="selectTab($event)"
+    mat-stretch-tabs="false"
+    animationDuration="0"
+  >
+    <!-- ===== Пользователи ===== -->
+    <mat-tab label="Пользователи">
+      <div class="toolbar">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            placeholder="Имя или email"
+            [value]="query()"
+            (input)="query.set($any($event.target).value)"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="select">
+          <mat-label>Роль</mat-label>
+          <mat-select [value]="roleFilter()" (valueChange)="roleFilter.set($event)">
+            <mat-option value="all">Все</mat-option>
+            <mat-option value="student">Студенты</mat-option>
+            <mat-option value="admin">Администраторы</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="select">
+          <mat-label>Активность</mat-label>
+          <mat-select [value]="activityFilter()" (valueChange)="activityFilter.set($event)">
+            <mat-option value="all">Все</mat-option>
+            <mat-option value="active">Занимаются</mat-option>
+            <mat-option value="idle">Не занимаются</mat-option>
+            <mat-option value="new">Не начинали</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="table" role="table" aria-label="Пользователи">
+        <div class="row header" role="row">
+          <span>Пользователь</span><span>Роль</span><span>Прогресс</span><span>Активность</span
+          ><span>Последнее действие</span><span></span>
+        </div>
+        @for (s of users(); track s.user.id) {
+          <div class="row" role="row">
+            <a class="user" [routerLink]="['/admin/users', s.user.id]">
+              <span class="avatar" [class.admin]="s.user.role === 'admin'">{{
+                s.user.name.charAt(0).toUpperCase()
+              }}</span>
+              <span class="who"
+                ><span class="name">{{ s.user.name }}</span
+                ><span class="email">{{ s.user.email }}</span></span
+              >
+            </a>
+            <span>
+              <mat-select
+                class="role-select"
+                [value]="s.user.role"
+                (valueChange)="changeRole(s.user.id, $event)"
+                [attr.aria-label]="'Роль ' + s.user.name"
+              >
+                <mat-option value="student">{{ roleLabels.student }}</mat-option>
+                <mat-option value="admin">{{ roleLabels.admin }}</mat-option>
+              </mat-select>
+            </span>
+            <span class="progress">
+              @if (s.user.role === 'student') {
+                <mat-progress-bar mode="determinate" [value]="s.percent" />
+                <small>{{ s.completed }} из {{ s.total }} уроков</small>
+              } @else {
+                <small class="muted">—</small>
+              }
+            </span>
+            <span>
+              @if (s.user.role === 'student') {
+                <span class="activity" [class]="s.activity">{{ activityLabels[s.activity] }}</span>
+                @if (s.pending) {
+                  <span class="badge" matTooltip="Заметок на проверке">{{ s.pending }}</span>
+                }
+              }
+            </span>
+            <span class="muted small">{{
+              s.lastActivity ? (s.lastActivity | date: 'd MMM, HH:mm') : 'нет'
+            }}</span>
+            <span class="row-actions">
+              <a mat-icon-button [routerLink]="['/admin/users', s.user.id]" matTooltip="Подробнее"
+                ><mat-icon>chevron_right</mat-icon></a
+              >
+              <button mat-icon-button (click)="deleteUser(s)" matTooltip="Удалить">
+                <mat-icon>person_remove</mat-icon>
+              </button>
+            </span>
+          </div>
+        } @empty {
+          <div class="empty">Пользователи не найдены</div>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ===== Проверка заметок ===== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        Проверка заметок
+        @if (lessons.pendingReviews().length) {
+          <span class="badge tab-badge">{{ lessons.pendingReviews().length }}</span>
+        }
+      </ng-template>
+      <div class="toolbar">
+        <mat-button-toggle-group
+          [value]="reviewFilter()"
+          (change)="reviewFilter.set($event.value)"
+          hideSingleSelectionIndicator
+        >
+          <mat-button-toggle value="submitted">На проверке</mat-button-toggle>
+          <mat-button-toggle value="needs-work">На доработке</mat-button-toggle>
+          <mat-button-toggle value="reviewed">Проверено</mat-button-toggle>
+          <mat-button-toggle value="all">Все</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+      <mat-accordion multi>
+        @for (r of reviews(); track r.id) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title
+                >{{ r.user?.name ?? 'Удалённый пользователь' }} —
+                {{ r.lesson?.title ?? 'Удалённый урок' }}</mat-panel-title
+              >
+              <mat-panel-description>
+                <span class="status" [class]="r.status">{{ statusLabels[r.status] }}</span>
+                <span class="small muted hide-mobile">{{
+                  r.submittedAt | date: 'd MMM, HH:mm'
+                }}</span>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <div class="note-content"><lv-markdown-preview [content]="r.content" /></div>
+            <mat-form-field appearance="outline" class="comment">
+              <mat-label>Комментарий преподавателя</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [value]="comments()[r.id] ?? r.teacherComment"
+                (input)="setComment(r.id, $any($event.target).value)"
+              ></textarea>
+            </mat-form-field>
+            <div class="review-actions">
+              <button mat-stroked-button (click)="review(r.id, 'needs-work', r.teacherComment)">
+                <mat-icon>undo</mat-icon>На доработку
+              </button>
+              <button mat-flat-button (click)="review(r.id, 'reviewed', r.teacherComment)">
+                <mat-icon>check</mat-icon>Принять
+              </button>
+            </div>
+          </mat-expansion-panel>
+        } @empty {
+          <div class="empty">Нет заметок с выбранным статусом</div>
+        }
+      </mat-accordion>
+    </mat-tab>
+
+    <!-- ===== Прогресс по урокам ===== -->
+    <mat-tab label="Прогресс по урокам">
+      <div class="table lessons" role="table" aria-label="Прогресс по урокам">
+        <div class="row header" role="row">
+          <span>Урок</span><span>Начали</span><span>Завершили</span><span>Заметок</span>
+        </div>
+        @for (s of lessonStats(); track s.lesson.id) {
+          <div class="row" role="row">
+            <a [routerLink]="['/lessons', s.lesson.id]" class="lesson-title">
+              {{ s.lesson.order }}. {{ s.lesson.title }}
+              @if (!s.lesson.published) {
+                <span class="muted small">(черновик)</span>
+              }
+            </a>
+            <span>{{ s.started }} / {{ s.total }}</span>
+            <span class="progress"
+              ><mat-progress-bar mode="determinate" [value]="s.percent" /><small
+                >{{ s.completed }} ({{ s.percent }}%)</small
+              ></span
+            >
+            <span>{{ s.notes }}</span>
+          </div>
+        } @empty {
+          <div class="empty">Уроков пока нет</div>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

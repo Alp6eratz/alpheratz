@@ -5,8 +5,12 @@ import { Note } from '@lingua/shared/models';
 export const NotesActions = createActionGroup({
   source: 'Notes',
   events: {
+    /** Открыть хранилище пользователя (scope — id пользователя). */
+    'Open Vault': props<{ scope: string }>(),
     /** Заметки загружены из хранилища (или созданы демо-данные). */
-    'Vault Loaded': props<{ notes: Note[]; folders: string[] }>(),
+    'Vault Loaded': props<{ scope: string; notes: Note[]; folders: string[] }>(),
+    /** Хранилище закрыто (выход пользователя) — состояние очищается. */
+    'Vault Closed': emptyProps(),
     /** Создана новая заметка. `open` — сразу открыть во вкладке. */
     'Note Created': props<{ note: Note; open: boolean }>(),
     /** Изменён текст заметки. */

@@ -1,0 +1,104 @@
+<!-- Редактор урока. -->
+@if (lesson(); as l) {
+  <div class="page">
+    <nav class="crumbs"><a routerLink="/lessons">Уроки</a> / Редактирование</nav>
+    <header class="head">
+      <h1>Урок {{ l.order }}</h1>
+      <div class="head-actions">
+        <a mat-stroked-button [routerLink]="['/lessons', l.id]"
+          ><mat-icon>visibility</mat-icon>Просмотр</a
+        >
+      </div>
+    </header>
+
+    <section class="card">
+      <mat-form-field appearance="outline">
+        <mat-label>Название</mat-label>
+        <input matInput [value]="l.title" (change)="update({ title: $any($event.target).value })" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Описание</mat-label>
+        <textarea
+          matInput
+          rows="2"
+          [value]="l.description"
+          (change)="update({ description: $any($event.target).value })"
+        ></textarea>
+      </mat-form-field>
+      <div class="toggles">
+        <mat-slide-toggle [checked]="l.published" (change)="update({ published: $event.checked })"
+          >Опубликован (виден студентам)</mat-slide-toggle
+        >
+        <mat-slide-toggle
+          [checked]="l.requireNote"
+          (change)="update({ requireNote: $event.checked })"
+          >Требовать заметку для завершения</mat-slide-toggle
+        >
+      </div>
+    </section>
+
+    <div class="materials-head">
+      <h2>Материалы · {{ l.materials.length }}</h2>
+      <button mat-flat-button [matMenuTriggerFor]="addMenu">
+        <mat-icon>add</mat-icon>Добавить материал
+      </button>
+      <mat-menu #addMenu="matMenu">
+        @for (t of typeList; track t.key) {
+          <button mat-menu-item (click)="add(t.key)">
+            <mat-icon>{{ t.icon }}</mat-icon
+            >{{ t.label }}
+          </button>
+        }
+      </mat-menu>
+    </div>
+
+    <ol class="materials">
+      @for (m of l.materials; track m.id; let first = $first; let last = $last) {
+        <li class="material">
+          <mat-icon class="type">{{ types[m.type].icon }}</mat-icon>
+          <div class="info">
+            <div class="title">{{ m.title }}</div>
+            <div class="meta">
+              {{ types[m.type].label }}
+              @if (m.fileName) {
+                · {{ m.fileName }} · {{ formatSize(m.size) }}
+              } @else if (m.url) {
+                · {{ m.url }}
+              }
+            </div>
+          </div>
+          <div class="actions">
+            <button
+              mat-icon-button
+              [disabled]="first"
+              (click)="facade.moveMaterial(l.id, m.id, -1)"
+              matTooltip="Выше"
+            >
+              <mat-icon>arrow_upward</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              [disabled]="last"
+              (click)="facade.moveMaterial(l.id, m.id, 1)"
+              matTooltip="Ниже"
+            >
+              <mat-icon>arrow_downward</mat-icon>
+            </button>
+            <button mat-icon-button (click)="edit(m)" matTooltip="Изменить">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="remove(m)" matTooltip="Удалить">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </li>
+      } @empty {
+        <li class="empty">Добавьте текст, видео, аудио, изображения, файлы или ссылки.</li>
+      }
+    </ol>
+  </div>
+} @else if (facade.loaded()) {
+  <div class="page">
+    <p>Урок не найден. <a routerLink="/lessons">К списку уроков</a></p>
+  </div>
+}

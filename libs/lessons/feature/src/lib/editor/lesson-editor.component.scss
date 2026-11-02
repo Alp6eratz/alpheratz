@@ -1,0 +1,107 @@
+// Стили редактора урока.
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+.crumbs {
+  font-size: 0.85rem;
+  color: var(--lv-text-faint);
+  a {
+    color: inherit;
+  }
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  h1 {
+    margin: 8px 0 16px;
+  }
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 20px 12px;
+  border-radius: 12px;
+  background: var(--lv-bg-secondary);
+  border: 1px solid var(--lv-border);
+}
+.toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.materials-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 12px;
+  flex-wrap: wrap;
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+}
+.materials {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.material {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--lv-bg-secondary);
+  border: 1px solid var(--lv-border);
+  .type {
+    color: var(--lv-accent);
+    flex-shrink: 0;
+  }
+  .info {
+    flex: 1;
+    min-width: 0;
+  }
+  .title {
+    font-weight: 600;
+  }
+  .meta {
+    font-size: 0.8rem;
+    color: var(--lv-text-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .actions {
+    display: flex;
+    flex-shrink: 0;
+  }
+}
+.empty {
+  padding: 28px;
+  text-align: center;
+  color: var(--lv-text-faint);
+  border: 1px dashed var(--lv-border-strong);
+  border-radius: 10px;
+}
+@media (max-width: 600px) {
+  .page {
+    padding: 16px 12px 48px;
+  }
+  .material {
+    flex-wrap: wrap;
+    .actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+}

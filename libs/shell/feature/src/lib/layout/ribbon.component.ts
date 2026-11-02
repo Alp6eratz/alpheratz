@@ -54,6 +54,7 @@ import { CommandService, PluginRegistry, RibbonItem } from '@lingua/core/plugin-
       @for (item of bottom(); track item.id) {
         <ng-container *ngTemplateOutlet="btn; context: { $implicit: item }" />
       }
+      <ng-content />
     </div>
   `,
   styles: `

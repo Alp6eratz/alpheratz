@@ -30,7 +30,12 @@
       "@lingua/notes/feature": ["libs/notes/feature/src/index.ts"],
       "@lingua/flashcards/feature": ["libs/flashcards/feature/src/index.ts"],
       "@lingua/graph/feature": ["libs/graph/feature/src/index.ts"],
-      "@lingua/settings/feature": ["libs/settings/feature/src/index.ts"]
+      "@lingua/settings/feature": ["libs/settings/feature/src/index.ts"],
+      "@lingua/auth/data-access": ["libs/auth/data-access/src/index.ts"],
+      "@lingua/auth/feature": ["libs/auth/feature/src/index.ts"],
+      "@lingua/lessons/data-access": ["libs/lessons/data-access/src/index.ts"],
+      "@lingua/lessons/feature": ["libs/lessons/feature/src/index.ts"],
+      "@lingua/admin/feature": ["libs/admin/feature/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -13,6 +13,7 @@ import { provideRouter, withComponentInputBinding, withHashLocation } from '@ang
 import { provideStore, Store } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { DISABLED_PLUGINS, providePlugins } from '@lingua/core/plugin-api';
+import { provideAuth } from '@lingua/auth/data-access';
 import { provideCoreState, settingsFeature } from '@lingua/core/data-access';
 import { appRoutes } from './app.routes';
 import { APP_PLUGINS } from './plugins';
@@ -30,6 +31,8 @@ export const appConfig: ApplicationConfig = {
       { runtimeChecks: { strictActionImmutability: true, strictStateImmutability: true } },
     ),
     provideCoreState(),
+    // Авторизация подключается после ядра: при восстановлении сессии она открывает хранилище пользователя.
+    provideAuth(),
     providePlugins(APP_PLUGINS),
     // Связываем список отключённых плагинов из NgRx с реестром плагинов.
     {

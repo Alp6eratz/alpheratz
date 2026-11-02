@@ -2,7 +2,7 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { settingsFeature } from '@lingua/core/data-access';
+import { settingsFeature, VaultFacade } from '@lingua/core/data-access';
 import { Flashcard, ReviewGrade } from '@lingua/shared/models';
 import { initialProgress, isDue, reviewCard } from '@lingua/shared/util';
 import { map, timer } from 'rxjs';
@@ -26,6 +26,7 @@ export const today = () => new Date().toLocaleDateString('sv-SE');
 @Injectable({ providedIn: 'root' })
 export class FlashcardsService {
   private readonly store = inject(Store);
+  private readonly vault = inject(VaultFacade);
 
   readonly cards = this.store.selectSignal(selectAllCards);
   readonly progress = this.store.selectSignal(flashcardsFeature.selectProgress);
@@ -104,6 +105,43 @@ export class FlashcardsService {
   /** Прогресс карточки (или начальный). */
   progressOf(card: Flashcard) {
     return this.progress()[card.id] ?? initialProgress(card.id);
+  }
+
+  /**
+   * Добавляет карточку. Карточки хранятся в заметках (как в Obsidian): новая строка
+   * «лицевая :: оборотная» дописывается в заметку «Карточки — <колода>» в папке «Карточки».
+   * Если такой заметки нет — она создаётся с тегом колоды.
+   */
+  addCard(front: string, back: string, deck: string): void {
+    const clean = (v: string) => v.replace(/::/g, ':').replace(/\s+/g, ' ').trim();
+    const f = clean(front);
+    const b = clean(back);
+    if (!f || !b) return;
+    const tag = deck.trim().replace(/^#/, '').toLowerCase().replace(/\s+/g, '-') || 'мои-карточки';
+    const title = `Карточки — ${tag}`;
+    const line = `- ${f} :: ${b}`;
+    const existingId = this.vault.titleIndex().get(title.toLowerCase());
+    const note = existingId ? this.vault.entities()[existingId] : undefined;
+    if (note) {
+      this.vault.updateContent(note.id, `${note.content.replace(/\s*$/, '')}\n${line}\n`);
+    } else {
+      this.vault.createNote({ title, folder: 'Карточки', content: `#${tag}\n\n${line}\n` }, false);
+    }
+  }
+
+  /** Удаляет карточку: убирает её строку из заметки-источника и забывает прогресс. */
+  deleteCard(card: Flashcard): void {
+    const note = this.vault.entities()[card.noteId];
+    if (!note) return;
+    const lines = note.content.split('\n');
+    const index = lines.findIndex((l) => {
+      const m = /^\s*(?:[-*]\s+)?(.+?)\s+::\s+(.+?)\s*$/.exec(l);
+      return !!m && m[1].trim() === card.front;
+    });
+    if (index < 0) return;
+    lines.splice(index, 1);
+    this.vault.updateContent(note.id, lines.join('\n'));
+    this.store.dispatch(FlashcardsActions.cardForgotten({ cardId: card.id }));
   }
 
   /** Сбрасывает весь прогресс. */

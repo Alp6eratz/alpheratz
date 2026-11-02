@@ -1,0 +1,180 @@
+// Стили страницы урока: материалы столбцом, блок заметки, нижняя панель действий.
+:host {
+  display: block;
+}
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+.crumbs {
+  font-size: 0.85rem;
+  color: var(--lv-text-faint);
+  a {
+    color: inherit;
+  }
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 8px 0 20px;
+  h1 {
+    margin: 0;
+  }
+}
+.desc {
+  margin: 6px 0 0;
+  color: var(--lv-text-muted);
+}
+.done-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #3fb27f;
+  font-weight: 600;
+}
+.materials {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.muted {
+  color: var(--lv-text-muted);
+}
+.small {
+  font-size: 0.8rem;
+}
+.note {
+  margin-top: 32px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px dashed var(--lv-border-strong);
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 1.15rem;
+    mat-icon {
+      color: var(--lv-accent);
+    }
+  }
+}
+.note-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.status {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--lv-hover);
+  color: var(--lv-text-muted);
+  &.submitted {
+    background: var(--lv-active);
+    color: var(--lv-accent);
+  }
+  &.needs-work {
+    background: color-mix(in srgb, #d99a1e 20%, transparent);
+    color: #d99a1e;
+  }
+  &.reviewed {
+    background: color-mix(in srgb, #3fb27f 20%, transparent);
+    color: #3fb27f;
+  }
+}
+.teacher {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 8px;
+  background: color-mix(in srgb, #3fb27f 12%, transparent);
+  border-left: 3px solid #3fb27f;
+  mat-icon {
+    color: #3fb27f;
+  }
+  .teacher-title {
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+}
+.mode {
+  margin: 8px 0;
+  --mat-button-toggle-height: 32px;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+  }
+}
+.note-box {
+  height: 320px;
+  border: 1px solid var(--lv-border);
+  border-radius: 8px;
+  overflow: auto;
+  background: var(--lv-bg);
+}
+.note-preview {
+  display: block;
+  padding: 16px;
+}
+.note-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+.student-note {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin-top: 8px;
+  border-radius: 8px;
+  background: var(--lv-bg-secondary);
+  color: var(--lv-text);
+  text-decoration: none;
+  &:hover {
+    background: var(--lv-hover);
+  }
+}
+.locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 70vh;
+  text-align: center;
+  padding: 24px;
+  color: var(--lv-text-muted);
+  mat-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    opacity: 0.6;
+  }
+}
+@media (max-width: 600px) {
+  .page {
+    padding: 16px 12px 48px;
+  }
+  .note {
+    padding: 14px;
+  }
+}

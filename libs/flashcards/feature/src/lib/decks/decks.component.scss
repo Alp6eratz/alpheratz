@@ -101,6 +101,79 @@ h2 {
   font-size: 0.65rem;
   color: var(--lv-text-faint);
 }
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.card-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.card-search {
+  width: 320px;
+  max-width: 100%;
+}
+.deck-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.deck-chip {
+  border: 1px solid var(--lv-border);
+  background: transparent;
+  color: var(--lv-text-muted);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  &.active {
+    background: var(--lv-active);
+    color: var(--lv-accent);
+    border-color: transparent;
+  }
+}
+.card-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--lv-border);
+  border-radius: 10px;
+}
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 4px 14px;
+  border-top: 1px solid var(--lv-border);
+  &:first-child {
+    border-top: none;
+  }
+  .front {
+    font-weight: 600;
+  }
+  .arrow {
+    color: var(--lv-text-faint);
+  }
+  .back {
+    flex: 1;
+    color: var(--lv-text-muted);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  button {
+    color: var(--lv-text-muted);
+    flex-shrink: 0;
+  }
+}
 .reset {
   margin-top: 24px;
   color: var(--lv-text-muted);

@@ -4,10 +4,11 @@
     <div>
       <h1>Карточки</h1>
       <p class="muted">
-        Добавляйте карточки в любую заметку строкой <code>слово :: перевод</code>. Колоды
-        формируются по тегам заметок.
+        Добавляйте карточки кнопкой или в любой заметке строкой <code>слово :: перевод</code>.
+        Колоды формируются по тегам заметок.
       </p>
     </div>
+    <button mat-flat-button (click)="addCard()"><mat-icon>add</mat-icon>Добавить карточку</button>
   </header>
 
   <section class="summary">
@@ -64,6 +65,57 @@
       </mat-card>
     } @empty {
       <p class="muted">Карточек пока нет.</p>
+    }
+  </div>
+
+  <h2>Мои карточки · {{ cardList().length }}</h2>
+  <div class="card-tools">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="card-search">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        placeholder="Поиск по карточкам"
+        [value]="cardQuery()"
+        (input)="cardQuery.set($any($event.target).value)"
+      />
+    </mat-form-field>
+    <div class="deck-chips">
+      @for (deck of service.decks(); track deck.id) {
+        <button
+          class="deck-chip"
+          [class.active]="cardDeck() === deck.id"
+          (click)="cardDeck.set(deck.id)"
+        >
+          {{ deck.title }}
+        </button>
+      }
+    </div>
+  </div>
+  <div class="card-list">
+    @for (card of cardList(); track card.id) {
+      <div class="card-row">
+        <span class="front">{{ card.front }}</span>
+        <span class="arrow">→</span>
+        <span class="back">{{ card.back }}</span>
+        <button
+          mat-icon-button
+          (click)="vault.open(card.noteId)"
+          matTooltip="Открыть заметку"
+          aria-label="Открыть заметку"
+        >
+          <mat-icon>description</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          (click)="deleteCard(card)"
+          matTooltip="Удалить карточку"
+          aria-label="Удалить карточку"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    } @empty {
+      <p class="muted pad">Карточек не найдено.</p>
     }
   </div>
 

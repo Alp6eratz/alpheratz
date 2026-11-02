@@ -60,6 +60,7 @@ export const workspaceFeature = createFeature({
         : [...state.tabs, { noteId, mode: mode ?? 'preview' }];
       return { ...state, tabs, activeNoteId: noteId };
     }),
+    on(NotesActions.vaultClosed, () => initialWorkspaceState),
     on(WorkspaceActions.leftNote, (state) => ({ ...state, activeNoteId: null })),
     on(WorkspaceActions.closeTab, (state, { noteId }) => removeTab(state, noteId)),
     on(NotesActions.noteDeleted, (state, { id }) => removeTab(state, id)),

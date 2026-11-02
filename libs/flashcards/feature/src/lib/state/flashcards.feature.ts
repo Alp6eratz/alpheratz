@@ -36,6 +36,10 @@ export const flashcardsFeature = createFeature({
         },
       };
     }),
+    on(FlashcardsActions.cardForgotten, (state, { cardId }) => {
+      const { [cardId]: _removed, ...progress } = state.progress;
+      return { ...state, progress };
+    }),
     on(FlashcardsActions.progressReset, () => initialState),
   ),
 });

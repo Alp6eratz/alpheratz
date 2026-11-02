@@ -45,6 +45,11 @@ export class LocalStorageVault extends VaultStorage {
   }
 }
 
+/** Ключ данных конкретного пользователя: `user:<id>:<ключ>`. */
+export function scopedKey(scope: string, key: string): string {
+  return `user:${scope}:${key}`;
+}
+
 /** Ключи хранилища. */
 export const STORAGE_KEYS = {
   notes: 'notes',

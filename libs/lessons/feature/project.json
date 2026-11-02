@@ -1,0 +1,8 @@
+{
+  "name": "lessons-feature",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/lessons/feature/src",
+  "prefix": "lv",
+  "projectType": "library",
+  "tags": ["scope:lessons", "type:feature"]
+}

@@ -17,6 +17,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { AuthFacade } from '@lingua/auth/data-access';
+import { UserMenuComponent } from '@lingua/auth/feature';
 import { CommandService, HotkeyService } from '@lingua/core/plugin-api';
 import {
   ThemeService,
@@ -45,6 +47,7 @@ const WIDTH_KEY = 'lingua-vault:left-width';
     SidePanelComponent,
     TabBarComponent,
     StatusBarComponent,
+    UserMenuComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell.component.html',
@@ -55,6 +58,8 @@ export class ShellComponent {
   private readonly router = inject(Router);
   private readonly commands = inject(CommandService);
   readonly vault = inject(VaultFacade);
+  /** Текущий пользователь: без входа показываются только экраны авторизации. */
+  readonly auth = inject(AuthFacade);
 
   /** true — узкий экран (телефон / маленький планшет). */
   readonly handset = toSignal(

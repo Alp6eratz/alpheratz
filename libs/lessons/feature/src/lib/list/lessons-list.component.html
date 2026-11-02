@@ -1,0 +1,131 @@
+<!-- Список уроков курса. -->
+<div class="page">
+  <header class="head">
+    <div>
+      <h1>Уроки</h1>
+      @if (facade.isAdmin()) {
+        <p class="muted">
+          Вы администратор: можно создавать, редактировать, публиковать и упорядочивать уроки.
+        </p>
+      } @else {
+        <p class="muted">
+          Проходите уроки по порядку — следующий откроется после завершения предыдущего.
+        </p>
+      }
+    </div>
+    @if (facade.isAdmin()) {
+      <button mat-flat-button (click)="create()"><mat-icon>add</mat-icon>Новый урок</button>
+    }
+  </header>
+
+  @if (!facade.isAdmin()) {
+    <section class="course-progress">
+      <div class="label">
+        Прогресс курса <strong>{{ facade.myPercent() }}%</strong>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="facade.myPercent()" />
+    </section>
+  }
+
+  <ol class="lessons">
+    @for (
+      lesson of facade.lessons();
+      track lesson.id;
+      let i = $index;
+      let first = $first;
+      let last = $last
+    ) {
+      @let access = facade.access().get(lesson.id);
+      <li class="lesson" [class.locked]="access?.locked" [class.done]="access?.completed">
+        <div class="num">
+          @if (access?.completed) {
+            <mat-icon>check</mat-icon>
+          } @else if (access?.locked) {
+            <mat-icon>lock</mat-icon>
+          } @else {
+            {{ i + 1 }}
+          }
+        </div>
+
+        <div class="body">
+          <div class="title-row">
+            @if (access?.locked) {
+              <span class="title">{{ lesson.title }}</span>
+            } @else {
+              <a class="title" [routerLink]="['/lessons', lesson.id]">{{ lesson.title }}</a>
+            }
+            @if (!lesson.published) {
+              <span class="chip draft">Черновик</span>
+            }
+            @if (access?.completed) {
+              <span class="chip done">Пройден</span>
+            } @else if (access?.started && !access?.locked) {
+              <span class="chip progress">В процессе</span>
+            }
+            @if (lesson.requireNote) {
+              <span class="chip" matTooltip="Для завершения нужно отправить заметку на проверку"
+                >Заметка</span
+              >
+            }
+          </div>
+          @if (lesson.description) {
+            <p class="desc">{{ lesson.description }}</p>
+          }
+          <div class="types">
+            @for (t of materialTypes(lesson); track t) {
+              <mat-icon [matTooltip]="types[t].label">{{ types[t].icon }}</mat-icon>
+            }
+            <span>{{ lesson.materials.length }} матер.</span>
+          </div>
+          @if (access?.locked) {
+            <p class="lock-hint">Завершите предыдущий урок, чтобы открыть этот.</p>
+          }
+        </div>
+
+        <div class="actions">
+          @if (facade.isAdmin()) {
+            <a
+              mat-icon-button
+              [routerLink]="['/lessons', lesson.id, 'edit']"
+              matTooltip="Редактировать"
+              ><mat-icon>edit</mat-icon></a
+            >
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Ещё">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button
+                mat-menu-item
+                (click)="facade.updateLesson(lesson.id, { published: !lesson.published })"
+              >
+                <mat-icon>{{ lesson.published ? 'visibility_off' : 'publish' }}</mat-icon
+                >{{ lesson.published ? 'Снять с публикации' : 'Опубликовать' }}
+              </button>
+              <button mat-menu-item [disabled]="first" (click)="facade.moveLesson(lesson.id, -1)">
+                <mat-icon>arrow_upward</mat-icon>Выше
+              </button>
+              <button mat-menu-item [disabled]="last" (click)="facade.moveLesson(lesson.id, 1)">
+                <mat-icon>arrow_downward</mat-icon>Ниже
+              </button>
+              <button mat-menu-item (click)="remove(lesson)">
+                <mat-icon>delete</mat-icon>Удалить
+              </button>
+            </mat-menu>
+          } @else if (!access?.locked) {
+            <a mat-stroked-button [routerLink]="['/lessons', lesson.id]">{{
+              access?.completed ? 'Повторить' : access?.started ? 'Продолжить' : 'Начать'
+            }}</a>
+          }
+        </div>
+      </li>
+    } @empty {
+      <li class="empty">
+        @if (facade.isAdmin()) {
+          Уроков пока нет. Создайте первый урок.
+        } @else {
+          Преподаватель ещё не опубликовал уроки.
+        }
+      </li>
+    }
+  </ol>
+</div>

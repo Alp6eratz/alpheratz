@@ -8,7 +8,7 @@ import {
   SidebarView,
   StatusBarItem,
 } from './plugin.model';
-import { DISABLED_PLUGINS, LINGUA_PLUGINS } from './plugin.tokens';
+import { CURRENT_ROLES, DISABLED_PLUGINS, LINGUA_PLUGINS } from './plugin.tokens';
 
 /** Сортировка по полю `order`. */
 const byOrder = <T extends { order?: number }>(a: T, b: T) => (a.order ?? 100) - (b.order ?? 100);
@@ -20,6 +20,12 @@ export class PluginRegistry {
 
   /** Сигнал отключённых плагинов. */
   private readonly disabled = inject(DISABLED_PLUGINS);
+  /** Роли текущего пользователя. */
+  private readonly roles = inject(CURRENT_ROLES);
+
+  /** Доступен ли элемент с ограничением `roles` текущему пользователю. */
+  private allowed = (item: { roles?: string[] }) =>
+    !item.roles?.length || item.roles.some((r) => this.roles().includes(r));
 
   /** Только включённые плагины. Системные (core) включены всегда. */
   readonly enabled = computed(() => {
@@ -29,13 +35,16 @@ export class PluginRegistry {
 
   /** Все команды включённых плагинов. */
   readonly commands = computed<PluginCommand[]>(() =>
-    this.enabled().flatMap((p) => p.commands ?? []),
+    this.enabled()
+      .flatMap((p) => p.commands ?? [])
+      .filter(this.allowed),
   );
 
   /** Кнопки ленты, отсортированные по порядку. */
   readonly ribbon = computed<RibbonItem[]>(() =>
     this.enabled()
       .flatMap((p) => p.ribbon ?? [])
+      .filter(this.allowed)
       .sort(byOrder),
   );
 
@@ -66,7 +75,7 @@ export class PluginRegistry {
   private views(side: 'left' | 'right'): SidebarView[] {
     return this.enabled()
       .flatMap((p) => p.sidebarViews ?? [])
-      .filter((v) => v.side === side)
+      .filter((v) => v.side === side && this.allowed(v))
       .sort(byOrder);
   }
 }

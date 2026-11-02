@@ -10,6 +10,8 @@ export const FlashcardsActions = createActionGroup({
     Restored: props<{ state: Partial<FlashcardsState> }>(),
     /** Карточка повторена: новый прогресс по SM-2. `isNew` — карточка показана впервые. */
     'Card Reviewed': props<{ progress: CardProgress; isNew: boolean; date: string }>(),
+    /** Карточка удалена — забыть её прогресс. */
+    'Card Forgotten': props<{ cardId: string }>(),
     /** Сбросить весь прогресс. */
     'Progress Reset': emptyProps(),
   },

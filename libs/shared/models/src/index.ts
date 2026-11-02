@@ -3,3 +3,5 @@ export * from './lib/note.model';
 export * from './lib/flashcard.model';
 export * from './lib/settings.model';
 export * from './lib/workspace.model';
+export * from './lib/user.model';
+export * from './lib/lesson.model';

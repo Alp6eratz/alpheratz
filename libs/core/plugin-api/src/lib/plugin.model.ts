@@ -12,6 +12,8 @@ export interface PluginCommand {
   name: string;
   /** Иконка Material Symbols. */
   icon?: string;
+  /** Роли, которым доступна команда (по умолчанию — всем вошедшим пользователям). */
+  roles?: string[];
   /** Горячая клавиша, например `Mod+Shift+F` (Mod = Ctrl или ⌘). */
   hotkey?: string;
   /**
@@ -37,6 +39,8 @@ export interface RibbonItem {
   order?: number;
   /** Разместить кнопку внизу ленты. */
   bottom?: boolean;
+  /** Роли, которым видна кнопка (по умолчанию — всем). */
+  roles?: string[];
 }
 
 /** Вид боковой панели (проводник, поиск, обратные ссылки…). */
@@ -49,6 +53,8 @@ export interface SidebarView {
   icon: string;
   /** Сторона: левая или правая панель. */
   side: 'left' | 'right';
+  /** Роли, которым виден вид (по умолчанию — всем). */
+  roles?: string[];
   /** Standalone-компонент, отображаемый в панели. */
   component: Type<unknown>;
   /** Порядок сортировки. */
